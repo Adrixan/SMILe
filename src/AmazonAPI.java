@@ -11,12 +11,7 @@ import java.util.Map;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-//import org.apache.camel.Exchange;
-//import org.apache.camel.Processor;
-//import org.apache.camel.component.file.FileComponent;
-//import org.apache.camel.component.http4.*;
-//import org.apache.camel.component.timer.*;
-
+// import org.apache.camel.component.http4.HttpOperationFailedException;
 
 public class AmazonAPI {
 	
@@ -28,21 +23,23 @@ public class AmazonAPI {
 			properties = new Properties();
 			properties.load(new FileInputStream("smile.properties"));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("FATAL: File smile.properties not found.");
+			System.exit(1);
+			// e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("FATAL: File smile.properties could not be read.");
+			System.exit(1);
+			// e.printStackTrace();
 		}
 		
-		final Map<String, String> myParams = new HashMap<>();
+		final Map<String, String> amazonParams = new HashMap<>();
 		
-		myParams.put("AssociateTag", "none");
-		myParams.put("Service", "AWSECommerceService");
-		myParams.put("Operation", "ItemSearch");
-		myParams.put("SearchIndex","Music");
-		myParams.put("Artist","Mika Vember");
-//		myParams.put("Keywords","");
+		amazonParams.put("AssociateTag", "none");
+		amazonParams.put("Service", "AWSECommerceService");
+		amazonParams.put("Operation", "ItemSearch");
+		amazonParams.put("SearchIndex","Music");
+		amazonParams.put("Artist","Hubert von Goisern");
+//		amazonParams.put("Keywords","");
 		
 	    SignedRequestsHelper signHelper = null;
         
@@ -53,17 +50,27 @@ public class AmazonAPI {
 			e.printStackTrace();
 		}
     
-        final String signedURL = signHelper.sign (myParams);
+        final String signedParams = signHelper.sign (amazonParams);
 
-        System.out.println(signedURL);
 		CamelContext context = new DefaultCamelContext();
 		
 		context.addRoutes(new RouteBuilder() {
 			
 			public void configure() {				
-				from("timer://foo?fixedRate=true&delay=0&period=10000").
-				to(signedURL).
-			    to("file:out?fileName=amazon.xml");
+				from("timer://foo?fixedRate=true&delay=0")
+				  .to("http4://" + properties.getProperty("amazon.endpoint") 
+				   		         + "/onca/xml?throwExceptionOnFailure=false&" + signedParams) 
+			      .to("file:out?fileName=amazon.xml");
+
+// SWOBI: Camel Exception Handling (doTry - doCatch)				
+//				  .doTry()
+//			         .to("http4://" + properties.getProperty("amazon.endpoint") 
+// 					                + "/onca/xml?" + signedParams)
+//			         .to("file:out?fileName=amazon.xml");
+//			      .doCatch(HttpOperationFailedException.class)
+//			         .to("file:out?fileName=error.xml")
+//			      .end(); 				
+			         
 			}
 		});
 			

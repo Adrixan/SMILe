@@ -26,10 +26,11 @@ import java.util.Base64;
 
 // Preparing the REST Request for the Amazon Product Advertising API
 // This is basically the sample code from http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AuthJavaSampleSig2.html
-// with three changes:
+// with four changes:
 // 1) use Java 8 java.util.Base64 native class instead of another dependency
 // 2) use java.util.Properties to configure the endpoint and "hide" my Amazon AWS keys
-// 3) use http4:// as Camel protocol and solve the signature problem
+// 3) return only the signed uri parameters
+// 4) solved the signature problem
 
 public class SignedRequestsHelper {
   private static final String UTF8_CHARSET = "UTF-8";
@@ -72,14 +73,21 @@ public class SignedRequestsHelper {
     String hmac = hmac(toSign);
 //    String sig = percentEncodeRfc3986(hmac);
 
-// Build signedURL for Camel HTTP4 component
+// Build signedParams for Camel HTTP4 component
 // SWOBI: Since there is a double urlencoding/decoding problem in this component I had to use RAW and *no* percent encoding
 // Otherwise a '+' in the base64 encoded signature would break the request (HTTP Error 403 - SignatureDoesNotMatch)
 // see http://camel.apache.org/how-do-i-configure-endpoints.html    
-    String url = "http4://" + endpoint + REQUEST_URI + "?" + canonicalQS 
-    		+ "&Signature=RAW(" + hmac + ")";
+
+// SWOBI: Code to build the whole HTTP4 URL here
+//   String url = "http4://" + endpoint + REQUEST_URI + "?" + canonicalQS + "&Signature=RAW(" + hmac + ")";
+//   return url;   
+ 
+    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
+
+// SWOBI: Code to generate the sporadic SignatureDoesNotMatch error (can be used to test exception handling ;-)
+//    String signedParams = canonicalQS + "&Signature=" + hmac;
     
-    return url;
+    return signedParams;  
   }
 
   private String hmac(String stringToSign) 
