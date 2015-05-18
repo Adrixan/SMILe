@@ -1,14 +1,14 @@
 import java.io.UnsupportedEncodingException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 // import java.net.URLDecoder;
 import java.net.URLEncoder;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.Calendar;
 // import java.util.HashMap;
 import java.util.Iterator;
@@ -30,19 +30,19 @@ import java.util.Base64;
 // 1) use Java 8 java.util.Base64 native class instead of another dependency
 // 2) use java.util.Properties to configure the endpoint and "hide" my Amazon AWS keys
 // 3) return only the signed uri parameters
-// 4) solved the signature problem
+// 4) solved the signature problem (again)
 
 public class SignedRequestsHelper {
   private static final String UTF8_CHARSET = "UTF-8";
   private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
   private static final String REQUEST_URI = "/onca/xml";
   private static final String REQUEST_METHOD = "GET";
+  
+  private static final Properties props = new Properties();
 
-// SWOBI: get the endpoint and keys from the properties file
-  Properties p = AmazonAPI.properties;
-  private String endpoint = p.getProperty("amazon.endpoint");
-  private String awsAccessKeyId = p.getProperty("amazon.awsAccessKeyId");
-  private String awsSecretKey = p.getProperty("amazon.awsSecretKey");
+  private String endpoint;
+  private String awsAccessKeyId;
+  private String awsSecretKey;
 
   private SecretKeySpec secretKeySpec = null;
   private Mac mac = null;
@@ -50,7 +50,24 @@ public class SignedRequestsHelper {
   public SignedRequestsHelper() throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException 
   {
     byte[] secretyKeyBytes;
-   
+    
+ // SWOBI: get the endpoint and keys from the properties file
+    try {
+  		props.load(new FileInputStream("smile.properties"));
+  	} catch (FileNotFoundException e) {
+  		System.out.println("FATAL: File smile.properties not found.");
+  		System.exit(1);
+  		// e.printStackTrace();
+  	} catch (IOException e) {
+  		System.out.println("FATAL: File smile.properties could not be read.");
+  		System.exit(1);
+  		// e.printStackTrace();
+  	}
+
+    endpoint = props.getProperty("amazon.endpoint");
+    awsAccessKeyId = props.getProperty("amazon.awsAccessKeyId");
+    awsSecretKey = props.getProperty("amazon.awsSecretKey"); 
+    
     secretyKeyBytes = awsSecretKey.getBytes(UTF8_CHARSET);
     secretKeySpec = new SecretKeySpec(secretyKeyBytes, HMAC_SHA256_ALGORITHM);
     mac = Mac.getInstance(HMAC_SHA256_ALGORITHM);
@@ -70,22 +87,18 @@ public class SignedRequestsHelper {
       + REQUEST_URI + "\n"
       + canonicalQS;
 
-    String hmac = hmac(toSign);
-//    String sig = percentEncodeRfc3986(hmac);
-
 // Build signedParams for Camel HTTP4 component
-// SWOBI: Since there is a double urlencoding/decoding problem in this component I had to use RAW and *no* percent encoding
+// SWOBI: Since there is a double urlencoding/decoding problem in this component I had to use percent encoding twice
 // Otherwise a '+' in the base64 encoded signature would break the request (HTTP Error 403 - SignatureDoesNotMatch)
-// see http://camel.apache.org/how-do-i-configure-endpoints.html    
+// see http://camel.apache.org/how-do-i-configure-endpoints.html
+// see http://blog.getsandbox.com/2014/05/31/escaping-camel-endpoint-encoding/
 
-// SWOBI: Code to build the whole HTTP4 URL here
-//   String url = "http4://" + endpoint + REQUEST_URI + "?" + canonicalQS + "&Signature=RAW(" + hmac + ")";
-//   return url;   
+    String hmac = hmac(toSign);
+    String sig = percentEncodeRfc3986(percentEncodeRfc3986(hmac)); 
  
-    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
+//    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
 
-// SWOBI: Code to generate the sporadic SignatureDoesNotMatch error (can be used to test exception handling ;-)
-//    String signedParams = canonicalQS + "&Signature=" + hmac;
+    String signedParams = canonicalQS + "&Signature=" + sig;
     
     return signedParams;  
   }
