@@ -18,14 +18,10 @@ import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Thumbnail;
-import com.google.api.services.youtubeAnalytics.YouTubeAnalytics;
-import com.google.api.services.youtubeAnalytics.model.ResultTable;
-import com.google.api.services.youtubeAnalytics.model.ResultTable.ColumnHeaders;
 
 public class KeywordSample {
 	
 	private static YouTube youtube;
-	private static YouTubeAnalytics analytics;
 	private static String key;
 	private static final long NUMBER_OF_VIDEOS_RETURNED = 25;
 	
@@ -52,11 +48,6 @@ public class KeywordSample {
         // the interface and provide a no-op function.
         youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, httpRequestInitializer)
         .setApplicationName("youtube-cmdline-search-sample").build();
-        
-        analytics = new YouTubeAnalytics.Builder(HTTP_TRANSPORT, JSON_FACTORY, httpRequestInitializer)
-        .setApplicationName("youtube-analytics-api-report-example")
-        .build();
-
 
 
         // Define the API request for retrieving search results.
@@ -165,28 +156,7 @@ public class KeywordSample {
         System.out.println(" Channel Playlist: "+"https://www.youtube.com/playlist?list="+bestMatch.getContentDetails().getRelatedPlaylists().getUploads());
         System.out.println("\n-------------------------------------------------------------\n");
     }
-    
-    /**
-     * Returns the views and unique viewers per day.
-     *
-     * @param analytics the analytics service object used to access the API.
-     * @param id the string id from which to retrieve data.
-     * @return the response from the API.
-     * @throws IOException if an API error occurred.
-     */
-    private static ResultTable executeViewsOverTimeQuery(YouTubeAnalytics analytics,
-        String id) throws IOException {
 
-      return analytics.reports()
-          .query("channel==" + id,     // channel id
-                 "2015-01-01",         // Start date.
-                 "2015-01-14",         // End date.
-                 "views,uniques")      // Metrics.
-          .setDimensions("day")
-          .setSort("day")
-          .setKey(key)
-          .execute();
-    }
 
 
 

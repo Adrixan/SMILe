@@ -1,210 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ahc-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ahc-ws-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-amqp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-apns-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-atmos-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-atmosphere-websocket-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-atom-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-avro-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-aws-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-bam-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-barcode-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-base64-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-bean-validator-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-beanio-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-beanstalk-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-bindy-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-blueprint-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-box-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cache-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cassandraql-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-castor-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-catalog-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cdi-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-chunk-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cmis-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cometd-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-commands-core-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-context-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-core-2.15.1-tests.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/camel/camel-core-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-core-osgi-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-couchdb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-crypto-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-csv-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cxf-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-cxf-transport-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-disruptor-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-dns-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-docker-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-dozer-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-dropbox-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-eclipse-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ejb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-elasticsearch-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-eventadmin-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-exec-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-facebook-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-flatpack-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-fop-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-freemarker-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ftp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-gae-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ganglia-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-geocoder-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-github-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-google-calendar-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-google-drive-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-google-mail-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-gora-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-groovy-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-gson-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-guava-eventbus-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-guice-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hawtdb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hazelcast-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hbase-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hdfs-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hdfs2-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hipchat-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-hl7-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-http-2.15.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/camel/camel-http4-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ibatis-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ical-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-infinispan-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-irc-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jackson-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jasypt-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-javaspace-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jaxb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jclouds-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jcr-2.15.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jdbc-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jetty-common-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jetty8-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jetty9-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jgroups-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jibx-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jing-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jira-2.15.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jms-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jmx-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-josql-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jpa-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jsch-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jsonpath-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jt400-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-juel-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jxpath-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-kafka-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-karaf-commands-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-kestrel-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-krati-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-kura-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ldap-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-leveldb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-linkedin-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-linkedin-api-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-lucene-2.15.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mail-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-metrics-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mina-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mina2-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mongodb-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mqtt-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-msv-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mustache-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mvel-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mybatis-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-nagios-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-netty-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-netty-http-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-netty4-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-netty4-http-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ognl-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-olingo2-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-olingo2-api-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-openshift-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-optaplanner-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-paxlogging-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-pgevent-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-printer-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-protobuf-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-quartz-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-quartz2-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-quickfix-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-rabbitmq-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-restlet-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-rmi-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-routebox-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-rss-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ruby-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-rx-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-salesforce-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-sap-netweaver-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-saxon-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-scala-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-schematron-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-scr-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-script-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-servlet-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-servletlistener-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-shiro-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-sip-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-sjms-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-smpp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-snmp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-soap-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-solr-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spark-rest-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-splunk-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-batch-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-integration-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-javaconfig-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-ldap-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-redis-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-security-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-spring-ws-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-sql-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-ssh-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-stax-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-stomp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-stream-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-stringtemplate-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-swagger-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-syslog-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-tagsoup-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-test-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-test-blueprint-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-test-spring-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-test-spring3-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-test-spring40-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-testng-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-twitter-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-univocity-parsers-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-urlrewrite-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-velocity-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-vertx-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-weather-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-websocket-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xmlbeans-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xmljson-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xmlrpc-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xmlsecurity-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xmpp-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-xstream-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-yammer-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-zipfile-2.15.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/camel/camel-zookeeper-2.15.1.jar"/>
 	<classpathentry kind="lib" path="lib/camel/slf4j-api-1.6.6.jar"/>
 	<classpathentry kind="lib" path="lib/database/commons-dbcp2-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/database/commons-pool2-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/database/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring-aop-4.1.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring-aspects-4.1.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring-beans-4.1.6.RELEASE.jar"/>
@@ -233,8 +37,41 @@
 	<classpathentry kind="lib" path="lib/email/mailapi.jar"/>
 	<classpathentry kind="lib" path="lib/email/pop3.jar"/>
 	<classpathentry kind="lib" path="lib/email/smtp.jar"/>
-	<classpathentry kind="lib" path="lib/lastfm/lastfm-java-0.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/camel/slf4j-simple-1.7.12.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0.jar" sourcepath="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/SMILe/lib/youtube/google-api-services-youtubeAnalytics-v1-rev51-1.20.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-android-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-gson-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-jackson2-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-java6-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-servlet-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-android-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-gson-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-jackson2-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-jdo-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-java6-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-jetty-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-servlet-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/gson-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jackson-core-2.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jetty-6.1.26.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jetty-util-6.1.26.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/transaction-api-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/http/httpclient-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/httpcore-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
