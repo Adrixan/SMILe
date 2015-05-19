@@ -37,8 +37,9 @@ public class KeywordSample {
     };
 
 	
-	public static void searchChannelTest(String channelKeyword, Properties properties) {
+	public static String searchChannelTest(String channelKeyword, Properties properties) {
 		
+		String retString = "";
 		key = properties.getProperty("youtube.key");
 		
 		try{
@@ -47,7 +48,7 @@ public class KeywordSample {
         // initialized when the HttpRequest is initialized, we override
         // the interface and provide a no-op function.
         youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, httpRequestInitializer)
-        .setApplicationName("youtube-cmdline-search-sample").build();
+        .setApplicationName("SMILe").build();
 
 
         // Define the API request for retrieving search results.
@@ -72,14 +73,14 @@ public class KeywordSample {
         SearchListResponse searchResponse = search.execute();
         List<SearchResult> searchResultList = searchResponse.getItems();
         if (searchResultList != null) {
-            prettyPrint(searchResultList.iterator(), channelKeyword);
+            retString = prettyPrint(searchResultList.iterator(), channelKeyword);
         }
 
 		} catch(Exception e){
 			
 		}
 
-
+		return retString;
 	}
 	
 	/*
@@ -90,12 +91,14 @@ public class KeywordSample {
      *
      * @param query Search query (String)
      */
-    private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
+    private static String prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
 
-        System.out.println("\n=============================================================");
-        System.out.println(
-                "   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
-        System.out.println("=============================================================\n");
+    	StringBuilder builder = new StringBuilder();
+    	builder.append("Artist Name: " + query+"\n");
+//        System.out.println("\n=============================================================");
+//        System.out.println(
+//                "   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+//        System.out.println("=============================================================\n");
 
         if (!iteratorSearchResults.hasNext()) {
             System.out.println(" There aren't any results for your query.");
@@ -115,9 +118,9 @@ public class KeywordSample {
                 Thumbnail thumbnail = singleChannel.getSnippet().getThumbnails().getDefault();
 
                                 
-                System.out.println(" Channel URL: "+ "http://www.youtube.com/channel/" + rId.getChannelId());
-                System.out.println(" Title: " + singleChannel.getSnippet().getTitle());
-                System.out.println(" Thumbnail: " + thumbnail.getUrl());
+//                System.out.println(" Channel URL: "+ "http://www.youtube.com/channel/" + rId.getChannelId());
+//                System.out.println(" Title: " + singleChannel.getSnippet().getTitle());
+//                System.out.println(" Thumbnail: " + thumbnail.getUrl());
                 
                 try {
     				YouTube.Channels.List channelSearch = youtube.channels().list("contentDetails,statistics,snippet");
@@ -128,8 +131,8 @@ public class KeywordSample {
     				for (Channel c : resultList) {
     					ChannelContentDetails cont = c.getContentDetails();
     					RelatedPlaylists pls = cont.getRelatedPlaylists();
-    					System.out.println(" Channel Playlist: "+"https://www.youtube.com/playlist?list="+pls.getUploads());
-    					System.out.println(" Channel Subscribers: "+c.getStatistics().getSubscriberCount());
+//    					System.out.println(" Channel Playlist: "+"https://www.youtube.com/playlist?list="+pls.getUploads());
+//    					System.out.println(" Channel Subscribers: "+c.getStatistics().getSubscriberCount());
     					if (bestMatch == null) {
     						bestMatch = c;
     					} else if (bestMatch.getStatistics().getSubscriberCount().compareTo(
@@ -141,23 +144,28 @@ public class KeywordSample {
     				// TODO Auto-generated catch block
     				e.printStackTrace();
     			}
-                
-                System.out.println("\n-------------------------------------------------------------\n");
             }
             
             
         }
+        
         System.out.println("//////////////////////////////////////////////////////////////////////////////");
         System.out.println("/////// BEST MATCH");
         System.out.println("//////////////////////////////////////////////////////////////////////////////\n");
-        System.out.println(" Channel URL: "+ "http://www.youtube.com/channel/" + bestMatch.getId());
-        System.out.println(" Title: " + bestMatch.getSnippet().getTitle());
-        System.out.println(" Channel Subscribers: "+bestMatch.getStatistics().getSubscriberCount());
-        System.out.println(" Channel Playlist: "+"https://www.youtube.com/playlist?list="+bestMatch.getContentDetails().getRelatedPlaylists().getUploads());
+        appendPrintln(builder,"Channel URL: "+ "http://www.youtube.com/channel/" + bestMatch.getId());
+        appendPrintln(builder,"Title: " + bestMatch.getSnippet().getTitle());
+        appendPrintln(builder,"Channel Subscribers: "+bestMatch.getStatistics().getSubscriberCount());
+        appendPrintln(builder,"Channel Playlist: "+"https://www.youtube.com/playlist?list="+bestMatch.getContentDetails().getRelatedPlaylists().getUploads());
         System.out.println("\n-------------------------------------------------------------\n");
+        
+        return builder.toString();
     }
 
 
 
+    private static void appendPrintln(StringBuilder builder, String string) {
+    	builder.append(string+"\n");
+        System.out.println(string);
+    }
 
 }
