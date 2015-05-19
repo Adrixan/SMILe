@@ -10,7 +10,6 @@ import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.Processor; 
-//import org.apache.camel.builder.ExpressionBuilder;
 // import org.apache.camel.component.http4.HttpOperationFailedException;
 import org.apache.commons.dbcp2.BasicDataSource;
 
