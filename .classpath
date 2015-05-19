@@ -233,6 +233,8 @@
 	<classpathentry kind="lib" path="lib/email/mailapi.jar"/>
 	<classpathentry kind="lib" path="lib/email/pop3.jar"/>
 	<classpathentry kind="lib" path="lib/email/smtp.jar"/>
+	<classpathentry kind="lib" path="lib/lastfm/lastfm-java-0.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/camel/slf4j-simple-1.7.12.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
