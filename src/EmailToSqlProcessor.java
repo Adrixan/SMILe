@@ -1,4 +1,6 @@
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -18,6 +20,11 @@ public class EmailToSqlProcessor implements Processor {
 		out.setBody("");
 		
 		String email = headers.get("From").toString();
+		
+		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
+		m.find();
+		email = m.group();
+		
 		String body = "";
 		
 		body +="Insert into subscriber (email) values ('" + email +"');\n";
