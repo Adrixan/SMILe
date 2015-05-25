@@ -9,7 +9,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         // TODO Auto-generated method stub
-    	Properties p = Main.properties;
+    	Properties p = Launcher.properties;
         
         from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
         .choice()
