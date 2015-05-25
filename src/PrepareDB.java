@@ -30,8 +30,8 @@ public class PrepareDB {
 			statement.executeUpdate("drop table if exists locations");
 			statement.executeUpdate("drop table if exists subscriber");
 			statement.executeUpdate("create table subscriber (email varchar(100) PRIMARY KEY)");
-			statement.executeUpdate("create table subscriptions (email varchar(100), artist varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email))");
-			statement.executeUpdate("create table locations (email varchar(100), location varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email))");
+			statement.executeUpdate("create table subscriptions (email varchar(100), artist varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
+			statement.executeUpdate("create table locations (email varchar(100), location varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
 		}
 		catch(SQLException e)
 		{

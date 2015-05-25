@@ -12,8 +12,15 @@ public class SimpleRouteBuilder extends RouteBuilder {
     	Properties p = Main.properties;
         
         from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
-        .process(new EmailToSqlProcessor()).split(new SqlSplitExpression()).wireTap("file:out").end()
-        .to("jdbc:accounts").end();
+        .choice()
+        .when(header("Subject").isEqualTo("subscribe")).to("direct:subscribe")
+        .when(header("Subject").isEqualTo("unsubscribe")).to("direct:unsubscribe")
+        .end();
+        
+        from("direct:subscribe").process(new EmailSubscribeProcessor()).to("direct:writedb");
+        from("direct:unsubscribe").process(new EmailUnsubscribeProcessor()).to("direct:writedb");
+                
+        from("direct:writedb").split(new SqlSplitExpression()).wireTap("file:out").end().to("jdbc:accounts").end();
          
      }  
 }

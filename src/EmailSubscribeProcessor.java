@@ -7,27 +7,20 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
 
-public class EmailToSqlProcessor implements Processor {
+public class EmailSubscribeProcessor implements Processor {
 
 	@Override
 	public void process(Exchange arg0) throws Exception {
 		Map<String,Object> headers = arg0.getIn().getHeaders();
-		for(String s : headers.keySet())
-			System.out.println(s + " " + headers.get(s).toString() + "\n");
 		Message out = arg0.getIn().copy();
-		
-		out.setHeader("Action", headers.get("Subject"));
-		out.setBody("");
-		
+
 		String email = headers.get("From").toString();
 		
 		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
 		m.find();
 		email = m.group();
 		
-		String body = "";
-		
-		body +="Insert into subscriber (email) values ('" + email +"');\n";
+		String body ="Insert into subscriber (email) values ('" + email +"');\n";
 		
 		for(String s : arg0.getIn().getBody().toString().split("\n"))
 		{
