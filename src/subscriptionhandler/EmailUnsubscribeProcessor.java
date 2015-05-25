@@ -1,3 +1,4 @@
+package subscriptionhandler;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,7 +8,7 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
 
-public class EmailSubscribeProcessor implements Processor {
+public class EmailUnsubscribeProcessor implements Processor {
 
 	@Override
 	public void process(Exchange arg0) throws Exception {
@@ -20,15 +21,7 @@ public class EmailSubscribeProcessor implements Processor {
 		m.find();
 		email = m.group();
 		
-		String body ="Insert into subscriber (email) values ('" + email +"');\n";
-		
-		for(String s : arg0.getIn().getBody().toString().split("\n"))
-		{
-			if(s.startsWith("Location:"))
-				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1] + "');\n";
-			if(s.startsWith("Artist:"))
-				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1] + "');\n";
-		}
+		String body ="Delete from subscriber where email='" + email +"';\n";
 
 		out.setBody(body);
 		arg0.setOut(out);
