@@ -38,6 +38,10 @@
 	<classpathentry kind="lib" path="lib/email/pop3.jar"/>
 	<classpathentry kind="lib" path="lib/email/smtp.jar"/>
 	<classpathentry kind="lib" path="lib/camel/slf4j-simple-1.7.12.jar"/>
+	<classpathentry kind="lib" path="lib/twitter/twitter4j-core-4.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-twitter-2.15.1.jar"/>
+	<classpathentry kind="lib" path="lib/twitter/twitter4j-stream-4.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-csv-2.15.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0.jar" sourcepath="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0-sources.jar">
 		<attributes>
