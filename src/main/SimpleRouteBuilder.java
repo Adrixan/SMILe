@@ -11,6 +11,7 @@ import subscriptionhandler.EmailUnsubscribeProcessor;
 import subscriptionhandler.SqlSplitExpression;
 import twitter.ArtistFinder;
 import twitter.TweetProcessor;
+import youtube.YoutubeChannelProcessor;
 
 public class SimpleRouteBuilder extends RouteBuilder {
 
@@ -57,7 +58,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	     .process(new ArtistFinder())
 	     .to("direct:LastFM");
 
-
     	log.debug("------------------------  KEY ----------------------------"+p.getProperty("lastFM.apiKey"));
     	
 //    	from("direct:LastFM")
@@ -68,6 +68,20 @@ public class SimpleRouteBuilder extends RouteBuilder {
     	from("direct:LastFM")
     	.process(new lastFM.LastFMProcessor("Ellie Goulding", "Vienna", ""+p.getProperty("lastFM.apiKey"))).split(new lastFM.LastFMSplitExpression())
     	.to("file:fm-out");
+    	
+    	
+		// Youtube grabber starts here
+		from("timer://foo?repeatCount=1&delay=0")
+				.setBody(simple("select distinct(artist) from subscriptions"))
+				.to("jdbc:accounts?outputType=StreamList")
+				.split(body())
+				.streaming()
+				.setBody(
+						body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+				.process(new ArtistFinder()).to("direct:youtubeAPI");
+
+		from("direct:youtubeAPI").process(new YoutubeChannelProcessor()).to(
+				"file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 	}  
 }
