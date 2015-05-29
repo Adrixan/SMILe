@@ -32,7 +32,11 @@ public class Main {
 			CamelContext context = new DefaultCamelContext(registry);
 
 
+			context.setTracing(true);
 			context.addRoutes(new SimpleRouteBuilder());
+//			context.addRoutes(new SimpleRouteBuilder2());
+			
+			//context.addRoutes(new SimpleRouteBuilder());
 
 			context.start();
 			Thread.sleep(10000);
