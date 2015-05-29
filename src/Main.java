@@ -12,6 +12,8 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.SimpleRegistry;
 import org.apache.commons.dbcp2.BasicDataSource;
 
+import com.mongodb.Mongo;
+
 public class Main {
 
 	public static Properties properties;
@@ -28,6 +30,9 @@ public class Main {
 			ds.setUrl("jdbc:mysql://" + properties.getProperty("rdbm.host") + "/" + properties.getProperty("rdbm.database") +"?"
 					+ "user=" + properties.getProperty("rdbm.user") +"&password=" + properties.getProperty("rdbm.password"));
 			registry.put("accounts", ds);
+			
+			Mongo mongoBean = new Mongo("localhost", 27017);
+	        registry.put("mongoBean", mongoBean);			
 
 			CamelContext context = new DefaultCamelContext(registry);
 
