@@ -77,5 +77,6 @@
 	<classpathentry kind="lib" path="lib/http/httpclient-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/http/httpcore-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/http/javax.servlet-api-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/lastfm/lastfm-java-0.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,3 +1,4 @@
+package lastFM;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;

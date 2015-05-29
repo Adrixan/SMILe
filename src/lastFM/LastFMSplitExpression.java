@@ -1,3 +1,4 @@
+package lastFM;
 import java.util.ArrayList;
 
 import org.apache.camel.Exchange;
