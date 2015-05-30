@@ -12,6 +12,7 @@ hs_err_pid*
 /bin/
 /in/
 /out/
+/fm-out/
 
 # Properties #
 *.properties

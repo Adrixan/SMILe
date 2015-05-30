@@ -25,12 +25,10 @@ public class TweetProcessor implements Processor {
 		
 		m.setHeader("type", "twitter");
 		
-		System.out.println("ARTIST:" + m.getHeader("artist"));
-		
-		HashMap<Long,String> out = new HashMap<Long,String>();
+		HashMap<String,String> out = new HashMap<String,String>();
 		
 		for(Status s : body)
-			out.put(s.getId(), s.getText() + " ++++++ " + s.getUser().getScreenName());
+			out.put(Long.toString(s.getId()), s.getText() + " ++++++ " + s.getUser().getScreenName());
 		
 		m.setBody(out);
 		
