@@ -2,6 +2,8 @@ package main;
 
 import java.util.Properties;
 
+import lastFM.EventFinder;
+
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 
@@ -50,24 +52,12 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		// LastFM grabber starts here 
 		from("timer://foo?repeatCount=1&delay=0")
-		.setBody(simple("select distinct(artist) from subscriptions"))
+		.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
 	     .to("jdbc:accounts?outputType=StreamList")
 	     .split(body()).streaming()
-	     .setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-	     .process(new ArtistFinder())
-	     .to("direct:LastFM");
-
-
-    	log.debug("------------------------  KEY ----------------------------"+p.getProperty("lastFM.apiKey"));
-    	
-//    	from("direct:LastFM")
-//    	.process(new LastFMProcessor("Ellie Goulding", "St. Pölten", ""+p.getProperty("lastFM.apiKey"))).split(new LastFMSplitExpression())
-//    	.to("file:fm-out");
-    	//.to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-    	
-    	from("direct:LastFM")
-    	.process(new lastFM.LastFMProcessor("Ellie Goulding", "Vienna", ""+p.getProperty("lastFM.apiKey"))).split(new lastFM.LastFMSplitExpression())
-    	.to("file:fm-out");
+	      .process(new EventFinder()).split(new lastFM.LastFMSplitExpression())
+	      .to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		//	.to("mock:mongo");
 
 	}  
 }

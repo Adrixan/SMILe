@@ -74,75 +74,45 @@ public class LastFMService {
 
 				retlist.add(event);
 
-				System.out.println("Event fuer "+this.artist+ ": "+event.toString()+" und Location = "+event.getCountry());
-
-				// TODO: setCountry und setCity umändern!!!
+				System.out.println("Event fuer "+this.artist+ ": "+event.toString()+" und Location = "+event.getCountry()+
+						"\nWebseite: "+event.getWebsite());
 
 			}
 
 		}
-
-		// = Artist.getInfo(artistOrMbid, locale, apiKey)
-		//(List<Event>)
-		//Collection<net.roarsoftware.lastfm.Event> eventGeo = Geo.getAllEvents("Wien", 50, API_KEY);
-
-
-
-
-
-
-		//		for (Event e : elist) {
-		//			if (e.getVenue().getCountry().equals(country) || country == null) {
-		//				sepm08.playITsmart.domain.Event event = new sepm08.playITsmart.domain.Event();
-		//
-		//				event.setId(e.getId());
-		//				event.setTitle(e.getTitle());
-		//				event.setCountry(e.getVenue().getCity() + ", " + e.getVenue().getCountry());
-		//				event.setWebsite(e.getWebsite());
-		//
-		//				event.setDate(new Date(e.getStartDate().getTime()));
-		//				log.debug("!!Datum: " + event.getDate());
-		//				retlist.add(event);
-		//			}
-		//		}
-		//
 		Collections.sort(retlist);
 		return retlist;
 
 	}
 
+	/*
+	 * artist: Returns the events of this Artist , location: city
+	 * find all events for an artist with a distance of 65 km of the provieded location
+	 * searching: 100 PageResults
+	 */
 	public List<pojo.Event> getUpcomingEventsInGeo(String artist, String location) {
 
-
-		//	Collection<net.roarsoftware.lastfm.Event> elist =  Artist.getEvents(artist, API_KEY);
-		//	Collection<net.roarsoftware.lastfm.Event> geoList = Geo.getAllEvents(location, "20", API_KEY);
-
-
-		PaginatedResult<Event> geoList; //= Geo.getEvents(location, "65", this.API_KEY);
-		Iterator<Event> eventList ;//= geoList.getPageResults().iterator();
+		PaginatedResult<Event> geoList; 
+		Iterator<Event> eventList ;
 		List<pojo.Event> retlist = new ArrayList<pojo.Event>();; 
 		for(int i=1; i<100; i++){
 			// Geo.getEvents(location, distance, page, apiKey)
 			geoList = Geo.getEvents(location, "65", i, this.API_KEY);
 			eventList = geoList.getPageResults().iterator();
-			
-		//	retlist
-
-			//	Iterator<Event> eventList = list.iterator();
 
 				while(eventList.hasNext()) {
 					Event e = eventList.next();
-
-					//if (e.getVenue().getCity()!=null && e.getVenue().getCity().equals(location)) {		//city
-		// TODo: Vgl mit oberen Methode!!!			
+					
 					Collection<String> artists = e.getArtists();
 					
 					Iterator<String> artistList = artists.iterator();
 
 					while(artistList.hasNext()) {
 						
-						if(artistList.next().equals(artist)){ //&& (e.getVenue().getCountry().equals(location)||e.getVenue().getCountry().equals(location) )){
+						if(artistList.next().equals(artist)){ 
 							pojo.Event event = new pojo.Event();
+							
+							System.out.println("BAMMMMM ---------------------------------------------");
 							event.setArtist(this.artist);
 							event.setId(e.getId());
 							event.setTitle(e.getTitle());
@@ -158,12 +128,6 @@ public class LastFMService {
 
 						}
 					}
-					
-					//artists.iterator().next().equals(artist);
-						
-						
-
-				//	}
 
 				}
 		}
@@ -171,53 +135,6 @@ public class LastFMService {
 		System.out.println("Groesse der Liste: "+retlist.size());
 		
 		return retlist;
-		
-//		PaginatedResult<Event> geoList = Geo.getEvents(location, "50",2, this.API_KEY);
-		//		PaginatedResult<net.roarsoftware.lastfm.Event> geoList =  Geo.getEvents(48.204722, 15.626667, 10, API_KEY);
-		//		PaginatedResult<Event> geoListN =  Geo.getEvents(15.626667, 48.204722, 100, API_KEY);
-		//48.204722,15.626667
-
-		//Collection<Event> list = geoList.getPageResults();
-
-		
-			//Iterator<Event> eventList = geoList.getPageResults().iterator();
-
-		
-		//		mArtistIterator = mArtistResults.getPageResults().iterator();
-//        while (mArtistIterator.hasNext()) {
-//            mArtistImageURL = mArtistIterator.next().getImageURL(
-//                    ImageSize.ORIGINAL);
-//        }
-
-	//	System.out.println("-----------Geoevents ------------ " +artist+ ": " +list.size());
-
-		
-
-		// = Artist.getInfo(artistOrMbid, locale, apiKey)
-		//(List<Event>)
-		//Collection<net.roarsoftware.lastfm.Event> eventGeo = Geo.getAllEvents("Wien", 50, API_KEY);
-
-
-
-
-
-
-		//		for (Event e : elist) {
-		//			if (e.getVenue().getCountry().equals(country) || country == null) {
-		//				sepm08.playITsmart.domain.Event event = new sepm08.playITsmart.domain.Event();
-		//
-		//				event.setId(e.getId());
-		//				event.setTitle(e.getTitle());
-		//				event.setCountry(e.getVenue().getCity() + ", " + e.getVenue().getCountry());
-		//				event.setWebsite(e.getWebsite());
-		//
-		//				event.setDate(new Date(e.getStartDate().getTime()));
-		//				log.debug("!!Datum: " + event.getDate());
-		//				retlist.add(event);
-		//			}
-		//		}
-		//
-		
 
 	}
 

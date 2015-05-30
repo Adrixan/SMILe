@@ -6,6 +6,7 @@ import org.apache.camel.Message;
 import org.apache.camel.impl.ExpressionAdapter;
 
 
+// only used for test issues like writing results in files
 public class LastFMSplitExpression extends ExpressionAdapter {
 
 	@Override
