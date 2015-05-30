@@ -2,6 +2,7 @@ package main;
 
 import java.util.Properties;
 
+import lastFM.EventFinder;
 import lastFM.LastFMProcessor;
 import lastFM.LastFMSplitExpression;
 import metrics.MetricsProcessor;
@@ -77,15 +78,23 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			     .to("direct:LastFM")
 			     .to("metrics:timer:lastfm-process.timer?action=stop");
 
-		log.debug("------------------------  KEY ----------------------------"+p.getProperty("lastFM.apiKey"));
+		
+//		from("direct:LastFM")
+//		.process(new lastFM.LastFMProcessor("Ellie Goulding", "Vienna", ""+p.getProperty("lastFM.apiKey"))).split(new lastFM.LastFMSplitExpression())
+//		.to("file:fm-out");
 
-//		    	from("direct:LastFM")
-//		    	.process(new LastFMProcessor("Ellie Goulding", "St. P�lten", ""+p.getProperty("lastFM.apiKey"))).split(new LastFMSplitExpression())
-//		.to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+// ACHTUNG: direct.LastFM exisitiert so nicht mehr -> umbauen!!! 
+				
+		// LastFM grabber starts here 
+				from("timer://foo?repeatCount=1&delay=0")
+				.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
+			     .to("jdbc:accounts?outputType=StreamList")
+			     .split(body()).streaming()
+			      .process(new EventFinder()).split(new lastFM.LastFMSplitExpression())
+			      .to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+			//      .to("direct:LastFM");
+			//		.to("mock:mongo"); // TODO: MongoDB Implementation
 
-		from("direct:LastFM")
-		.process(new lastFM.LastFMProcessor("Ellie Goulding", "Vienna", ""+p.getProperty("lastFM.apiKey"))).split(new lastFM.LastFMSplitExpression())
-		.to("file:fm-out");
 
 
 		// Youtube grabber starts here
