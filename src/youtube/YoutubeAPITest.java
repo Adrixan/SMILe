@@ -1,42 +1,46 @@
+package youtube;
+import java.io.FileInputStream;
+import java.util.Properties;
+
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.Processor; 
 // import org.apache.camel.component.http4.HttpOperationFailedException;
 
-public class AmazonAPI {
+public class YoutubeAPITest {
+	
+	public static Properties properties;
 	
 	public static void main(String[] args) throws Exception {
     
 		CamelContext context = new DefaultCamelContext();
-
-		PropertiesComponent pc = new PropertiesComponent();
-		pc.setLocation("file:smile.properties");
+		
+		try {
+			properties = new Properties();
+			properties.load(new FileInputStream("smile.properties"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 		
 		context.setTracing(true);
-		
-		context.addComponent("properties", pc);
 		
 		context.addRoutes(new RouteBuilder() {
 			
 			public void configure() {				         				
-				Processor buildAmazonURL = new BuildAmazonURL();
+				Processor channelProcessor = new YoutubeChannelProcessor();
 				
 // Route to test the amazonAPI Route
 // reads artist names from in/artists.txt, splits lines and calls amazonAPI route with artist name in body				
 				from("file:in?fileName=artists.txt&noop=true")
                   .split(body().tokenize("\n"))
-                  .to("direct:amazonAPI");
+                  .to("direct:youtubeAPI");
 				
 // amazonAPI Route
-                from("direct:amazonAPI")
-                  .process(buildAmazonURL)
-                  //.setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                  .setHeader(Exchange.HTTP_URI, simple("${body}"))
-       	     	  .to("http4://dummyhost?throwExceptionOnFailure=false") 
-			      .to("file:out?fileName=amazon_${date:now:yyyyMMdd_HHmmssSSS}.xml");
+                from("direct:youtubeAPI")
+                  .process(channelProcessor)
+			      .to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 // SWOBI: Camel Exception Handling (doTry - doCatch)				
 //				  .doTry()

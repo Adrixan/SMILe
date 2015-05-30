@@ -1,4 +1,5 @@
 package main;
+
 import java.util.Properties;
 
 import org.apache.camel.ProducerTemplate;
@@ -10,6 +11,7 @@ import subscriptionhandler.EmailUnsubscribeProcessor;
 import subscriptionhandler.SqlSplitExpression;
 import twitter.ArtistFinder;
 import twitter.TweetProcessor;
+import youtube.YoutubeChannelProcessor;
 
 public class SimpleRouteBuilder extends RouteBuilder {
 
@@ -46,6 +48,40 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("twitter://search?consumerKey="+ p.getProperty("twitter.consumerkey")+"&consumerSecret="+p.getProperty("twitter.consumersecret")+"&accessToken="+p.getProperty("twitter.accesstoken")+"&accessTokenSecret="+p.getProperty("twitter.accesstokensecret"))
 		.process(new TweetProcessor())
 		.to("mock:mongo");
+		
+		// LastFM grabber starts here 
+		from("timer://foo?repeatCount=1&delay=0")
+		.setBody(simple("select distinct(artist) from subscriptions"))
+	     .to("jdbc:accounts?outputType=StreamList")
+	     .split(body()).streaming()
+	     .setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+	     .process(new ArtistFinder())
+	     .to("direct:LastFM");
+
+    	log.debug("------------------------  KEY ----------------------------"+p.getProperty("lastFM.apiKey"));
+    	
+//    	from("direct:LastFM")
+//    	.process(new LastFMProcessor("Ellie Goulding", "St. Pölten", ""+p.getProperty("lastFM.apiKey"))).split(new LastFMSplitExpression())
+//    	.to("file:fm-out");
+    	//.to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+    	
+    	from("direct:LastFM")
+    	.process(new lastFM.LastFMProcessor("Ellie Goulding", "Vienna", ""+p.getProperty("lastFM.apiKey"))).split(new lastFM.LastFMSplitExpression())
+    	.to("file:fm-out");
+    	
+    	
+		// Youtube grabber starts here
+		from("timer://foo?repeatCount=1&delay=0")
+				.setBody(simple("select distinct(artist) from subscriptions"))
+				.to("jdbc:accounts?outputType=StreamList")
+				.split(body())
+				.streaming()
+				.setBody(
+						body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+				.process(new ArtistFinder()).to("direct:youtubeAPI");
+
+		from("direct:youtubeAPI").process(new YoutubeChannelProcessor()).to(
+				"file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 	}  
 }
