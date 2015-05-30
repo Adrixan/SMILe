@@ -2,17 +2,13 @@ package main;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.camel.CamelContext;
 import org.apache.camel.Main;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jms.JmsComponent;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.SimpleRegistry;
+import org.apache.camel.component.metrics.routepolicy.MetricsRegistryService;
 import org.apache.commons.dbcp2.BasicDataSource;
+
+import com.codahale.metrics.MetricRegistry;
 
 public class Launcher {
 
@@ -30,12 +26,38 @@ public class Launcher {
 		ds.setUrl("jdbc:mysql://" + properties.getProperty("rdbm.host") + "/" + properties.getProperty("rdbm.database") +"?"
 				+ "user=" + properties.getProperty("rdbm.user") +"&password=" + properties.getProperty("rdbm.password"));
 		main.bind("accounts", ds);
+		// Registry necessary so metrics are properly kept in memory
+		MetricRegistry metricRegistry = new com.codahale.metrics.MetricRegistry();
+		main.bind("metricRegistry", metricRegistry);
         // add routes
-        main.addRouteBuilder(new SimpleRouteBuilder());
+		SimpleRouteBuilder r = new SimpleRouteBuilder();
+        main.addRouteBuilder(r);
  
         // run until you terminate the JVM
         System.out.println("Starting Camel. Use ctrl + c to terminate the JVM.\n");
         main.run();
+        
+//		for(int sleep = 0; sleep < 20 ; sleep++){
+//			
+//			MetricsRegistryService regSvc = r.getContext().hasService(MetricsRegistryService.class);
+//			if(regSvc != null) {
+//				// Dump the statistics to the log in JSON format.
+//				regSvc.setPrettyPrint(true);
+//				System.out.println(regSvc.dumpStatisticsAsJson());
+//
+//				// Do it again, retrieving the map of counters from the MetricRegistry object.
+//				//            LOG.info("----------");
+//				//            MetricRegistry reg = regSvc.getMetricsRegistry();
+//				//            SortedMap<String, Counter> counters = reg.getCounters();
+//				//            LOG.info("Keys found {{}]", counters.keySet().size());
+//				//            for(String key : counters.keySet()) {
+//				//                LOG.info("--- key [{}] - value [{}]", key, counters.get("key").getCount());
+//				//            }
+//			} else {
+//				System.out.println("Couldn't find MetricsRegisteryService instance");
+//			}
+//			Thread.sleep(10000);
+//		}
     }
 
 
