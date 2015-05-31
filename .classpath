@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/camel/camel-core-2.15.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/camel/camel-http4-2.15.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jdbc-2.15.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/camel/camel-jms-2.15.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/camel/camel-mail-2.15.1.jar"/>
+	<classpathentry kind="lib" path="lib/camel/slf4j-api-1.6.6.jar"/>
+	<classpathentry kind="lib" path="lib/database/commons-dbcp2-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/database/commons-pool2-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-aop-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-aspects-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-beans-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-context-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-context-support-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-core-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-expression-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-instrument-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-instrument-tomcat-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-jdbc-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-jms-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-messaging-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-orm-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-oxm-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-test-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-tx-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-web-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-webmvc-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-webmvc-portlet-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-websocket-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/database/mysql-connector-java-5.1.35-bin.jar"/>
+	<classpathentry kind="lib" path="lib/email/mail.jar"/>
+	<classpathentry kind="lib" path="lib/email/dsn.jar"/>
+	<classpathentry kind="lib" path="lib/email/gimap.jar"/>
+	<classpathentry kind="lib" path="lib/email/imap.jar"/>
+	<classpathentry kind="lib" path="lib/email/mailapi.jar"/>
+	<classpathentry kind="lib" path="lib/email/pop3.jar"/>
+	<classpathentry kind="lib" path="lib/email/smtp.jar"/>
+	<classpathentry kind="lib" path="lib/camel/slf4j-simple-1.7.12.jar"/>
+	<classpathentry kind="lib" path="lib/twitter/twitter4j-core-4.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-twitter-2.15.1.jar"/>
+	<classpathentry kind="lib" path="lib/twitter/twitter4j-stream-4.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-csv-2.15.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0.jar" sourcepath="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/SMILe/lib/youtube/google-api-services-youtubeAnalytics-v1-rev51-1.20.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-android-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-gson-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-jackson2-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-java6-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-api-client-servlet-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-android-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-gson-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-jackson2-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-http-client-jdo-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-appengine-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-java6-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-jetty-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/google-oauth-client-servlet-1.20.0.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/gson-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jackson-core-2.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jdo2-api-2.3-eb.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jetty-6.1.26.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jetty-util-6.1.26.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="lib/youtube/libs/transaction-api-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/http/httpclient-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/httpcore-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/http/javax.servlet-api-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/lastfm/lastfm-java-0.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/database/mongo-java-driver-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-mongodb-2.15.1.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-sql-2.15.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
