@@ -24,9 +24,7 @@ public class TweetProcessor implements Processor {
 		ArrayList<Status> body = (ArrayList<Status>) m.getBody();
 		
 		m.setHeader("type", "twitter");
-		
-		System.out.println("ARTIST:" + m.getHeader("artist"));
-		
+
 		HashMap<String,String> out = new HashMap<String,String>();
 		
 		for(Status s : body)

@@ -6,7 +6,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
-
+// not usesd -> only for test issues
 public class LastFMProcessor implements Processor {
 
 	private String artist;
@@ -28,20 +28,18 @@ public class LastFMProcessor implements Processor {
 		
 		
 		Message out = arg0.getIn().copy();
-		System.out.println("Artist: "+this.artist);
+		System.out.println("Artist im Processor: "+this.artist);
 		
 		
 		String body = "";
 		
-		LastFMService lfm = new LastFMService(this.artist, this.API_KEY);
-	//	List<pojo.Event> eventList = lfm.getUpcomingEvents(this.artist, this.location);
-	//	List<pojo.Event> eventList = lfm.getUpcomingEvents("Ellie Goulding", "Vienna");
-		List<pojo.Event> eventList = lfm.getUpcomingEventsInGeo(this.artist, this.location);
-    	
-  //  	lfm.getUpcomingEventsInGeo("Ellie Goulding", "St. Pölten");
-		body +="Artist "+"Eventname "+"City-Location "+"Country-Location "+"Date\n";
 		
-//		System.out.println("GRoESSe: "+eventList.size());
+		LastFMService lfm = new LastFMService(this.artist, this.API_KEY);
+		List<pojo.Event> eventList = lfm.getUpcomingEvents(this.artist, this.location);
+	//	List<pojo.Event> eventList = lfm.getUpcomingEvents("Ellie Goulding", "Vienna");
+//		List<pojo.Event> eventList = lfm.getUpcomingEventsInGeo(this.artist, this.location);
+    	
+		body +="Artist "+"Eventname "+"City-Location "+"Country-Location "+"Date\n";
 		
 		for(pojo.Event e:eventList){
 			body += e.getArtist()+

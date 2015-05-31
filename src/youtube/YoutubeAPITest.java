@@ -1,4 +1,4 @@
-package youtubeAPI;
+package youtube;
 import java.io.FileInputStream;
 import java.util.Properties;
 
@@ -8,13 +8,13 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.Processor; 
 // import org.apache.camel.component.http4.HttpOperationFailedException;
 
-public class YoutubeAPI {
+public class YoutubeAPITest {
+	
+	public static Properties properties;
 	
 	public static void main(String[] args) throws Exception {
     
 		CamelContext context = new DefaultCamelContext();
-		
-		final Properties properties;
 		
 		try {
 			properties = new Properties();
@@ -29,7 +29,7 @@ public class YoutubeAPI {
 		context.addRoutes(new RouteBuilder() {
 			
 			public void configure() {				         				
-				Processor channelProcessor = new YoutubeChannelProcessor(properties);
+				Processor channelProcessor = new YoutubeChannelProcessor();
 				
 // Route to test the amazonAPI Route
 // reads artist names from in/artists.txt, splits lines and calls amazonAPI route with artist name in body				
@@ -40,7 +40,7 @@ public class YoutubeAPI {
 // amazonAPI Route
                 from("direct:youtubeAPI")
                   .process(channelProcessor)
-			      .to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.xml");
+			      .to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 // SWOBI: Camel Exception Handling (doTry - doCatch)				
 //				  .doTry()
