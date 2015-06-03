@@ -68,15 +68,15 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("mock:mongo");
 
 		// LastFM grabber starts here 
-				from("timer://foo?repeatCount=1&delay=0")
-				.to("metrics:timer:lastfm-process.timer?action=start")
-				.setBody(simple("select distinct(artist) from subscriptions"))
-			     .to("jdbc:accounts?outputType=StreamList")
-			     .split(body()).streaming()
-			     .setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-			     .process(new ArtistFinder()).to("metrics:counter:lastfm-artists-found.counter")
-			     .to("direct:LastFM")
-			     .to("metrics:timer:lastfm-process.timer?action=stop");
+//				from("timer://foo?repeatCount=1&delay=0")
+//				.to("metrics:timer:lastfm-process.timer?action=start")
+//				.setBody(simple("select distinct(artist) from subscriptions"))
+//			     .to("jdbc:accounts?outputType=StreamList")
+//			     .split(body()).streaming()
+//			     .setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+//			     .process(new ArtistFinder()).to("metrics:counter:lastfm-artists-found.counter")
+//			     .to("direct:LastFM")
+//			     .to("metrics:timer:lastfm-process.timer?action=stop");
 
 		
 //		from("direct:LastFM")
@@ -87,16 +87,17 @@ public class SimpleRouteBuilder extends RouteBuilder {
 				
 		// LastFM grabber starts here 
 				from("timer://foo?repeatCount=1&delay=0")
+				.to("metrics:timer:lastfm-process.timer?action=start")
 				.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
 			     .to("jdbc:accounts?outputType=StreamList")
 			     .split(body()).streaming()
-			      .process(new EventFinder()).split(new lastFM.LastFMSplitExpression())
-			      .to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+			      .process(new EventFinder()).split(new lastFM.LastFMSplitExpression()).to("metrics:counter:lastfm-artists-found.counter")
+			      .to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt")
+			      .to("metrics:timer:lastfm-process.timer?action=stop");
 			//      .to("direct:LastFM");
 			//		.to("mock:mongo"); // TODO: MongoDB Implementation
 
-
-
+	
 		// Youtube grabber starts here
 		from("timer://foo?repeatCount=1&delay=0")
 		.to("metrics:timer:youtube-process.timer?action=start")
@@ -117,6 +118,24 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("jetty:http://localhost:12345/stats").process(new MetricsProcessor());
 		
 		//.to("file:out?fileName=metrics_${date:now:yyyyMMdd_HHmmssSSS}.json");
+		
+// Versuch Velocity //from("direct:a").to("velocity:org/apache/camel/component/velocity/letter.vm").to("mock:result");
+		
+		from("file:fm-in?noop=true")
+	    .log("Working on file ${header.CamelFileName}")
+	    .setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}
+	    .to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user") +"&to="+p.getProperty("email.user")); 
+		
+		/*zum Experimentieren
+		 * 
+		 * //	"smtp://you@mymailserver.com?password=secret&From=you@apache.org" + recipients
+			//smtp://host[:port]?password=somepwd&username=someuser
+				
+			//.to("smtps://smtp.gmail.com?username=fullemailaddress&password=secretpw&to=recipient@mail.com");
+			//"smtps://myname@gmx.at?password=secretpw&to=recipient@mail.com"
+
+		 * 
+		 * */
 
 	}  
 }
