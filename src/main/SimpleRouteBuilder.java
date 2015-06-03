@@ -116,18 +116,21 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	
 		// Youtube grabber starts here
 		from("timer://foo?repeatCount=1&delay=0")
-		.to("metrics:timer:youtube-process.timer?action=start")
-		.setBody(simple("select distinct(artist) from subscriptions"))
-		.to("jdbc:accounts?outputType=StreamList")
-		.split(body())
-		.streaming()
-		.setBody(
-				body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-				.process(new ArtistFinder()).to("direct:youtubeAPI")
-				.to("metrics:timer:youtube-process.timer?action=stop");
+			.to("metrics:timer:youtube-process.timer?action=start")
+			.setBody(simple("select distinct(artist) from subscriptions"))
+			.to("jdbc:accounts?outputType=StreamList")
+			.split(body())
+			.streaming()
+			.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+			.process(new ArtistFinder())
+			.to("direct:youtubeAPI")
+			.to("metrics:timer:youtube-process.timer?action=stop");
 
-		from("direct:youtubeAPI").process(new YoutubeChannelProcessor()).to("metrics:counter:YouTube-Playlists-generated.counter").to(
-				"file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		from("direct:youtubeAPI")
+			.process(new YoutubeChannelProcessor())
+			.to("metrics:counter:YouTube-Playlists-generated.counter")
+			.to("mock:mongo");
+			//.to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
 		//from("timer://foo1?repeatCount=30&delay=5000")
 		

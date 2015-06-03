@@ -1,6 +1,7 @@
 package youtube;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class PlaylistFinder {
 	private YouTube youtube;
 	private String key;
 	// private final long NUMBER_OF_CHANNELS_RETURNED = 25;
+	private HashMap<String, String> playlistInfo;
 
 	/** Instance of the HTTP transport. */
 	private final NetHttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -40,6 +42,7 @@ public class PlaylistFinder {
 
 	public PlaylistFinder(String artistName) {
 		this.artistName = artistName;
+		playlistInfo = new HashMap<String, String>();
 
 		if (DEBUG)
 			key = YoutubeAPITest.properties.getProperty("youtube.key");
@@ -54,9 +57,13 @@ public class PlaylistFinder {
 				httpRequestInitializer).setApplicationName("SMILe").build();
 	}
 
-	public String getPlaylistInfo() throws IOException {
-
-		String retString = "";
+	/**
+	 * Returns a Hashmap with infos about the artists
+	 * channel, title, subscribers, playlist
+	 * @return
+	 * @throws Exception if there are no results
+	 */
+	public HashMap<String,String> getPlaylistInfo() throws Exception {
 
 		// Define the API request for retrieving search results.
 		YouTube.Search.List search = youtube.search().list("id,snippet");
@@ -75,10 +82,10 @@ public class PlaylistFinder {
 		SearchListResponse searchResponse = search.execute();
 		List<SearchResult> searchResultList = searchResponse.getItems();
 		if (searchResultList != null) {
-			retString = createPlaylistString(searchResultList.iterator());
+			fillPlaylistInfoMap(searchResultList.iterator());
 		}
 
-		return retString;
+		return playlistInfo;
 	}
 
 	/**
@@ -87,16 +94,17 @@ public class PlaylistFinder {
 	 * 
 	 * @param iteratorSearchResults
 	 * @return
+	 * @throws Exception if there are no results
 	 */
-	private String createPlaylistString(
-			Iterator<SearchResult> iteratorSearchResults) {
+	private void fillPlaylistInfoMap(
+			Iterator<SearchResult> iteratorSearchResults) throws Exception {
 
-		StringBuilder builder = new StringBuilder();
-		builder.append("Artist Name: " + artistName + "\n");
+		//StringBuilder builder = new StringBuilder();
+		//builder.append("Artist Name: " + artistName + "\n");
 
 		if (!iteratorSearchResults.hasNext()) {
 			// System.out.println(" There aren't any results for your query.");
-			return "There aren't any results for your query.";
+			throw new Exception("There aren't any results for your query.");
 		}
 
 		Channel bestMatch = null;
@@ -144,23 +152,18 @@ public class PlaylistFinder {
 			System.out
 					.println("//////////////////////////////////////////////////////////////////////////////\n");
 		}
-		appendPrintln(builder, "Channel URL: "
-				+ "http://www.youtube.com/channel/" + bestMatch.getId());
-		appendPrintln(builder, "Title: " + bestMatch.getSnippet().getTitle());
-		appendPrintln(builder, "Channel Subscribers: "
-				+ bestMatch.getStatistics().getSubscriberCount());
-		appendPrintln(builder, "Channel Playlist: "
-				+ "https://www.youtube.com/playlist?list="
+		playlistInfo.put("channel", "http://www.youtube.com/channel/" + bestMatch.getId());
+		playlistInfo.put("title", bestMatch.getSnippet().getTitle());
+		playlistInfo.put("subscribers", bestMatch.getStatistics().getSubscriberCount().toString());
+		playlistInfo.put("playlist", "https://www.youtube.com/playlist?list="
 				+ bestMatch.getContentDetails().getRelatedPlaylists()
-						.getUploads());
-		
-		return builder.toString();
+				.getUploads());
 	}
 
-	private void appendPrintln(StringBuilder builder, String string) {
-		builder.append(string + "\n");
-		if (DEBUG)
-			System.out.println(string);
-	}
+//	private void appendPrintln(StringBuilder builder, String string) {
+//		builder.append(string + "\n");
+//		if (DEBUG)
+//			System.out.println(string);
+//	}
 
 }
