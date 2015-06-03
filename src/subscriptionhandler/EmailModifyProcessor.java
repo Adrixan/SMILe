@@ -16,20 +16,20 @@ public class EmailModifyProcessor implements Processor {
 		Message out = arg0.getIn().copy();
 
 		String email = headers.get("From").toString();
-		
+
 		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
 		m.find();
 		email = m.group();
-		
+
 		String body ="";
-		
+
 		for(String s : arg0.getIn().getBody().toString().split("\n"))
 		{
 			if(s.startsWith("+Location:"))
 				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1] + "');\n";
 			if(s.startsWith("+Artist:"))
 				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1] + "');\n";
-			
+
 			if(s.startsWith("-Location:"))
 				body +="Delete from locations where email='" + email +"' and location='" + s.split(":")[1] + "';\n";
 			if(s.startsWith("-Artist:"))

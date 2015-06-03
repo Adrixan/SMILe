@@ -139,10 +139,10 @@ public class PlaylistFinder {
 
 		if (DEBUG) {
 			System.out
-					.println("//////////////////////////////////////////////////////////////////////////////");
+			.println("//////////////////////////////////////////////////////////////////////////////");
 			System.out.println("/////// BEST MATCH");
 			System.out
-					.println("//////////////////////////////////////////////////////////////////////////////\n");
+			.println("//////////////////////////////////////////////////////////////////////////////\n");
 		}
 		appendPrintln(builder, "Channel URL: "
 				+ "http://www.youtube.com/channel/" + bestMatch.getId());
@@ -152,8 +152,8 @@ public class PlaylistFinder {
 		appendPrintln(builder, "Channel Playlist: "
 				+ "https://www.youtube.com/playlist?list="
 				+ bestMatch.getContentDetails().getRelatedPlaylists()
-						.getUploads());
-		
+				.getUploads());
+
 		return builder.toString();
 	}
 

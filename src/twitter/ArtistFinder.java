@@ -16,37 +16,37 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class ArtistFinder implements Processor {
-	
+
 	Properties p = Launcher.properties;
 
 	@Override
 	public void process(Exchange arg0) throws Exception {
 		Message m = arg0.getIn();
-		
+
 		String body = (String) m.getBody();
-		
+
 		m.setHeader("artist", body);
-		
-		
+
+
 		ConfigurationBuilder cb = new ConfigurationBuilder();
-    	cb.setDebugEnabled(true)
-    	  .setOAuthConsumerKey(p.getProperty("twitter.consumerkey"))
-    	  .setOAuthConsumerSecret(p.getProperty("twitter.consumersecret"))
-    	  .setOAuthAccessToken(p.getProperty("twitter.accesstoken"))
-  .setOAuthAccessTokenSecret(p.getProperty("twitter.accesstokensecret"));
-    	
-        Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-        try {
-            
-            ResponseList<User> users = twitter.searchUsers(body, 0);
-            User u = users.get(0);
-            
-            m.setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
-            
-        } catch (TwitterException te) {
-            te.printStackTrace();
-        }
-		
+		cb.setDebugEnabled(true)
+		.setOAuthConsumerKey(p.getProperty("twitter.consumerkey"))
+		.setOAuthConsumerSecret(p.getProperty("twitter.consumersecret"))
+		.setOAuthAccessToken(p.getProperty("twitter.accesstoken"))
+		.setOAuthAccessTokenSecret(p.getProperty("twitter.accesstokensecret"));
+
+		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+		try {
+
+			ResponseList<User> users = twitter.searchUsers(body, 0);
+			User u = users.get(0);
+
+			m.setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
+
+		} catch (TwitterException te) {
+			te.printStackTrace();
+		}
+
 	}
 
 }

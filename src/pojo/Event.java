@@ -60,7 +60,7 @@ public class Event implements Comparable<Event> {
 	public void setCity(String city) {
 		this.city = city;
 	}
-	
+
 	public String getArtist() {
 		return artist;
 	}
@@ -68,7 +68,7 @@ public class Event implements Comparable<Event> {
 	public void setArtist(String artist) {
 		this.artist = artist;
 	}
-	
+
 	@Override
 	public String toString() {
 		return title + " - " + date;
@@ -117,7 +117,7 @@ public class Event implements Comparable<Event> {
 		return date.compareTo(e.getDate());
 	}
 
-	
 
-	
+
+
 }
