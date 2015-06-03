@@ -134,11 +134,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("jetty:http://localhost:12345/stats").process(new MetricsProcessor());
 		
 		//.to("file:out?fileName=metrics_${date:now:yyyyMMdd_HHmmssSSS}.json");
-<<<<<<< .mine
-		
-=======
-    	      
->>>>>>> .theirs
+
 // Versuch Velocity //from("direct:a").to("velocity:org/apache/camel/component/velocity/letter.vm").to("mock:result");
 		
 		from("file:fm-in?noop=true")
@@ -154,7 +150,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			//.to("smtps://smtp.gmail.com?username=fullemailaddress&password=secretpw&to=recipient@mail.com");
 			//"smtps://myname@gmx.at?password=secretpw&to=recipient@mail.com"
 
-		 * 
+		 */
        //Inserts data about artist into MongoDB overwrites if already existing
        from("direct:mongoInsert")
        .process(new MongoInsertProcessor())
