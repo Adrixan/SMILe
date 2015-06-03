@@ -21,15 +21,15 @@ public class YoutubeChannelProcessor implements Processor {
 		
 		m.setHeaders(headers);
 		
-		
-		
 		//System.out.println("Artist: "+artist);
-		
+
 		//Set the body to the playlist info
 		PlaylistFinder finder = new PlaylistFinder(artist);
+
 		HashMap<String,String> playlistinfo = finder.getPlaylistInfo();
 		m.setBody(playlistinfo);
 		exchange.setIn(m);
+
 	}
 
 }

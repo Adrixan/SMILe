@@ -12,10 +12,10 @@ public class MongoFixArtistString implements Processor{
 		String artist;		
 		artist = (String) out.getHeader("artist");
 		artist = artist.replaceAll(" ", "_");    	
-    	
+
 		System.out.println("Fixed Artist: " + artist);
-		
-    	out.setHeader("artist", artist);
-    	arg0.setOut(out);
+
+		out.setHeader("artist", artist);
+		arg0.setOut(out);
 	}
 }

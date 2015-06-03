@@ -16,13 +16,13 @@ public class EmailSubscribeProcessor implements Processor {
 		Message out = arg0.getIn().copy();
 
 		String email = headers.get("From").toString();
-		
+
 		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
 		m.find();
 		email = m.group();
-		
+
 		String body ="Insert into subscriber (email) values ('" + email +"');\n";
-		
+
 		for(String s : arg0.getIn().getBody().toString().split("\n"))
 		{
 			if(s.startsWith("Location:"))

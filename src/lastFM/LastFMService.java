@@ -27,10 +27,10 @@ public class LastFMService {
 
 	private String API_KEY;
 	private String artist;
-	
+
 
 	public LastFMService(){
-		
+
 	}
 	public LastFMService(String artist, String apiKey){
 		this.artist = artist; 
@@ -46,7 +46,7 @@ public class LastFMService {
 
 
 		this.artist = artist;
-		
+
 		System.out.println("------------------------------------Artist " +this.artist);
 		Collection<Event> elist = Artist.getEvents(this.artist, this.API_KEY).getPageResults();
 
@@ -100,40 +100,40 @@ public class LastFMService {
 			geoList = Geo.getEvents(location, "65", i, this.API_KEY);
 			eventList = geoList.getPageResults().iterator();
 
-				while(eventList.hasNext()) {
-					Event e = eventList.next();
-					
-					Collection<String> artists = e.getArtists();
-					
-					Iterator<String> artistList = artists.iterator();
+			while(eventList.hasNext()) {
+				Event e = eventList.next();
 
-					while(artistList.hasNext()) {
-						
-						if(artistList.next().equals(artist)){ 
-							pojo.Event event = new pojo.Event();
-							
-							System.out.println("BAMMMMM ---------------------------------------------");
-							event.setArtist(this.artist);
-							event.setId(e.getId());
-							event.setTitle(e.getTitle());
-							event.setCountry(e.getVenue().getCountry());
-							event.setCity(e.getVenue().getCity());
-							event.setWebsite(e.getWebsite());
+				Collection<String> artists = e.getArtists();
 
-							event.setDate(new Date(e.getStartDate().getTime()));
+				Iterator<String> artistList = artists.iterator();
 
-							retlist.add(event);
+				while(artistList.hasNext()) {
 
-							System.out.println("----------GeoEvent fuer "+artist+ ": "+event.toString()+" und Location = "+event.getCountry());
+					if(artistList.next().equals(artist)){ 
+						pojo.Event event = new pojo.Event();
 
-						}
+						System.out.println("BAMMMMM ---------------------------------------------");
+						event.setArtist(this.artist);
+						event.setId(e.getId());
+						event.setTitle(e.getTitle());
+						event.setCountry(e.getVenue().getCountry());
+						event.setCity(e.getVenue().getCity());
+						event.setWebsite(e.getWebsite());
+
+						event.setDate(new Date(e.getStartDate().getTime()));
+
+						retlist.add(event);
+
+						System.out.println("----------GeoEvent fuer "+artist+ ": "+event.toString()+" und Location = "+event.getCountry());
+
 					}
-
 				}
+
+			}
 		}
 		Collections.sort(retlist);
 		System.out.println("Groesse der Liste: "+retlist.size());
-		
+
 		return retlist;
 
 	}

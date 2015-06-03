@@ -19,7 +19,7 @@ public class PrepareDB {
 		{
 			Properties properties = new Properties();
 			properties.load(new FileInputStream("smile.properties"));
-			
+
 			Class.forName("com.mysql.jdbc.Driver");
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:mysql://" + properties.getProperty("rdbm.host") + "/" + properties.getProperty("rdbm.database") +"?"
