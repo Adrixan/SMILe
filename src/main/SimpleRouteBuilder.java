@@ -1,6 +1,22 @@
 package main;
 
+
 import java.util.Properties;
+
+
+import mongodb.MongoByArtistProcessor;
+import mongodb.MongoFixArtistString;
+import mongodb.MongoInsertProcessor;
+import mongodb.MongoResultProcessor;
+
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.builder.RouteBuilder;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 import lastFM.EventFinder;
 import lastFM.LastFMProcessor;
@@ -118,7 +134,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("jetty:http://localhost:12345/stats").process(new MetricsProcessor());
 		
 		//.to("file:out?fileName=metrics_${date:now:yyyyMMdd_HHmmssSSS}.json");
+<<<<<<< .mine
 		
+=======
+    	      
+>>>>>>> .theirs
 // Versuch Velocity //from("direct:a").to("velocity:org/apache/camel/component/velocity/letter.vm").to("mock:result");
 		
 		from("file:fm-in?noop=true")
@@ -135,7 +155,99 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			//"smtps://myname@gmx.at?password=secretpw&to=recipient@mail.com"
 
 		 * 
-		 * */
+       //Inserts data about artist into MongoDB overwrites if already existing
+       from("direct:mongoInsert")
+       .process(new MongoInsertProcessor())
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=save"));       
+       
+       //gets one grabber from a single artist collection
+       from("direct:mongoGetArtist")
+       .setBody()
+       .simple("${header.type}")
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
+       .process(new MongoResultProcessor())
+       .to("mock:sortArtists");
+       
+       //gets all data for a single Artist
+       //atm still returns multiple messages
+       from("direct:mongoGetFullArtist")
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findAll"))
+       .split().body()
+       .process(new MongoResultProcessor())
+       .to("mock:sortArtists");       
+       
+       
+       // First try to get multiple artists not sure if we need it
+//       from("direct:mongoGetFullArtists")
+//       .setHeader("artists")
+//       .simple("metallica, slayer")
+//       .to("log:mongo:splitter1?level=INFO")
+//       .split().method("splitterBean", "splitHeader")
+//       .to("direct:mongoGetFullArtist")
+//       .to("log:mongo:splitter2?level=INFO")
+//       .aggregate().body()
+//       .to("log:mongo:aggregator?level=INFO");
+       
+       
+       
+       
+       
+
+/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
+       
+//     from("timer://runOnce?repeatCount=1&delay=5000")
+//     .to("direct:testFindAll");
+//     .to("direct:testInsert");
+//     .to("direct:testFindById");
+//     .to("direct:testRemove");
+//     .to("direct:mongoGetArtists");       
+       
+       from("direct:testInsert")
+       .setHeader("artist")
+       .simple("blind guardian")
+       .setHeader("type")
+       .simple("test3")
+       .process(new MongoInsertProcessor())
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=save"));
+       
+       from("direct:testRemove")
+       .setHeader("artist")
+       .simple("slayer")
+       .setHeader("type")
+       .simple("test")       
+       .process(new MongoByArtistProcessor())
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=remove"));
+       	   	 
+       
+       from("direct:testFindById")
+       .setHeader("artist")
+       .simple("blind guardian")
+       .setHeader("type")
+       .simple("test")      
+       .setBody()
+       .simple("${header.type}")
+       .process(new MongoFixArtistString())
+       .recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findById"))
+       .to("log:mongo:findById1?level=INFO")
+       .process(new MongoResultProcessor())
+       .to("log:mongo:findById2?level=INFO");
+       
+      from("direct:testFindAll")
+     .setHeader("artist")
+     .simple("blind guardian")
+     .setHeader("type")
+     .simple("test")      
+     .process(new MongoFixArtistString())
+     .recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findAll"))
+     .to("log:mongo:findAll1?level=INFO")
+     .split().body()
+     .process(new MongoResultProcessor())
+     .to("log:mongo:findAll2?level=INFO");    	
 
 	}  
 }

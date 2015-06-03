@@ -114,5 +114,8 @@
 	<classpathentry kind="lib" path="lib/http/httpcore-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/http/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/lastfm/lastfm-java-0.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/database/mongo-java-driver-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-mongodb-2.15.1.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-sql-2.15.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
