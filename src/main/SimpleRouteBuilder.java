@@ -1,8 +1,9 @@
 package main;
 
 
-import java.util.Properties;
+import hipchat.HipchatMessageProcessor;
 
+import java.util.Properties;
 
 import mongodb.MongoByArtistProcessor;
 import mongodb.MongoFixArtistString;
@@ -10,10 +11,12 @@ import mongodb.MongoInsertProcessor;
 import mongodb.MongoResultProcessor;
 
 import org.apache.camel.builder.RouteBuilder;
+
 import lastFM.EventFinder;
 import metrics.MetricsProcessor;
 
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
+
 import subscriptionhandler.EmailModifyProcessor;
 import subscriptionhandler.EmailSubscribeProcessor;
 import subscriptionhandler.EmailUnsubscribeProcessor;
@@ -65,6 +68,33 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("metrics:counter:twitter-artists-processed.counter")
 		.to("direct:mongoInsert");
 
+		// Hipchat playlist workflow
+		from("timer://foo4?repeatCount=1&delay=0")
+		.to("metrics:timer:hipchat-process.timer?action=start")
+		.setHeader("type", simple("youtube"))
+		.setHeader("caller", simple("hipchat"))
+		.setBody(simple("select email from subscriber"))
+		.to("jdbc:accounts")
+		.split(body())
+		.setBody(body().regexReplaceAll("\\{email=(.*)(\\r)?\\}", "$1"))
+		.to("direct:getPlaylists")
+		.to("metrics:timer:hipchat-process.timer?action=stop");
+		
+		from("direct:getPlaylists")
+		.setHeader("subscriber", body())
+		.setBody(simple("select artist from subscriptions where email = '${body}'"))
+		.to("jdbc:accounts")
+		.split(body())
+		.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+		.setHeader("artist",body())
+		.to("direct:mongoGetArtist");
+		
+		from("direct:sendHipchat")
+		.setHeader("HipchatToRoom",simple("smile-twitter"))
+		.setHeader("HipchatTriggerNotification", simple("true"))
+		.process(new HipchatMessageProcessor())
+		.to("hipchat://?authToken=" + p.getProperty("hipchat.authtoken"))
+		.to("metrics:counter:playlists-sent-hipchat.counter");
 
 		// LastFM grabber starts here 
 		from("timer://foo?repeatCount=1&delay=0")
@@ -93,7 +123,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:youtubeAPI")
 			.process(new YoutubeChannelProcessor())
 			.to("metrics:counter:YouTube-Playlists-generated.counter")
-			.to("mock:mongo");
+			.to("direct:mongoInsert");
 			//.to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
 		//from("timer://foo1?repeatCount=30&delay=5000")
@@ -138,8 +168,13 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
 		.process(new MongoResultProcessor())
 		.to("metrics:counter:mongo-getArtist.counter")
-		.to("mock:sortArtists")
+		.to("direct:chooseCall")
 		.to("metrics:timer:mongo-getArtist.timer?action=stop");
+		
+		
+		// Routing for results from MongoDB
+		from("direct:chooseCall")
+		.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end();
 
 		//gets all data for a single Artist
 		//atm still returns multiple messages
