@@ -1,8 +1,12 @@
 package youtube;
 import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.Processor; 
@@ -30,26 +34,24 @@ public class YoutubeAPITest {
 
 			public void configure() {				         				
 				Processor channelProcessor = new YoutubeChannelProcessor();
+				
+				errorHandler(deadLetterChannel("direct:myDLC"));
 
-				// Route to test the amazonAPI Route
-				// reads artist names from in/artists.txt, splits lines and calls amazonAPI route with artist name in body				
+				// Route to test the youtubeAPI
+				// reads artist names from in/artists.txt, splits lines and calls youtubeAPI route with artist name in body				
 				from("file:in?fileName=artists.txt&noop=true")
 				.split(body().tokenize("\n"))
 				.to("direct:youtubeAPI");
 
-				// amazonAPI Route
+				// youtubeAPI Route
 				from("direct:youtubeAPI")
 				.process(channelProcessor)
+				.process(new HashProcessor())
 				.to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-
-				// SWOBI: Camel Exception Handling (doTry - doCatch)				
-				//				  .doTry()
-				//			         .to("http4://" + properties.getProperty("amazon.endpoint") 
-				// 					                + "/onca/xml?" + signedParams)
-				//			         .to("file:out?fileName=amazon.xml");
-				//			      .doCatch(HttpOperationFailedException.class)
-				//			         .to("file:out?fileName=error.xml&allowNullBody=True")
-				//			      .end(); 				
+				
+				//DeadLetterChannel
+				from("direct:myDLC")
+				.process(new DLCProcessor());
 
 			}
 		});
@@ -59,5 +61,34 @@ public class YoutubeAPITest {
 		context.stop();
 
 	} 
+	
+	private static class HashProcessor implements Processor {
+
+		@Override
+		public void process(Exchange exchange) throws Exception {
+			Message m = exchange.getIn();
+			
+			StringBuilder builder = new StringBuilder();
+			HashMap<String,String> playlistinfo = (HashMap<String, String>) m.getBody();
+			for (Entry<String, String> e : playlistinfo.entrySet()) {
+				builder.append(e.getKey() + " +++++++++ " + e.getValue()+"\n");
+			}
+			m.setBody(builder.toString());
+			exchange.setIn(m);
+		}
+		
+	}
+	
+	private static class DLCProcessor implements Processor {
+
+		@Override
+		public void process(Exchange exchange) throws Exception {
+			Exception e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+			System.out.println("DLC Excpetion caught. Has Message: "+e.getMessage());
+			System.out.println("DLC Exchange Message Body: "+ exchange.getIn().getBody());
+			
+		}
+		
+	}
 
 }

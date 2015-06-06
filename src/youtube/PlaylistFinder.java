@@ -20,7 +20,7 @@ import com.google.api.services.youtube.model.SearchResult;
 
 public class PlaylistFinder {
 
-	private final boolean DEBUG = false;
+	private final boolean DEBUG = true;
 
 	private String artistName;
 
