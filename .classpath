@@ -78,6 +78,7 @@
 	<classpathentry kind="lib" path="lib/jetty/jetty-webapp-9.2.11.v20150529.jar"/>
 	<classpathentry kind="lib" path="lib/jetty/jetty-xml-9.2.11.v20150529.jar"/>
 	<classpathentry kind="lib" path="lib/jetty/servlet-api-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/camel/camel-hipchat-2.15.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0.jar" sourcepath="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0-sources.jar">
 		<attributes>
