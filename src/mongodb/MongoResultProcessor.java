@@ -1,13 +1,9 @@
 package mongodb;
 
 import java.util.HashMap;
-import java.util.Iterator;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
-
-import twitter4j.JSONObject;
 
 public class MongoResultProcessor implements Processor{
 
@@ -15,25 +11,19 @@ public class MongoResultProcessor implements Processor{
 	public void process(Exchange arg0) throws Exception {
 		Message out = arg0.getIn().copy();
 
-		HashMap<String, String> body = new HashMap<String, String>();
+		HashMap body = new HashMap();
 
 		if (arg0.getIn().getBody() != null) {
 			System.out.println("found artist: " + out.getHeader("artist"));
-			JSONObject JSONBody = new JSONObject(arg0.getIn().getBody().toString());
-			Iterator<?> keys = JSONBody.keys();
-			//		sBody = arg0.getIn().getBody().toString();
-			while(keys.hasNext()){
-				String key = (String)keys.next();
-				String value = JSONBody.getString(key); 
-				body.put(key, value);
-
-			}		
+			
+			StringToHashMap sthm = new StringToHashMap();
+			body = sthm.StringToHashMap(arg0.getIn().getBody().toString());
 		}
 
 		String artist;		
 		artist = (String) out.getHeader("artist");
-		artist = artist.replaceAll(" ", "_");  		
-
+		artist = artist.replaceAll("_", " ");  		
+		System.out.println(body);
 		out.setHeader("artist", artist);
 		out.setBody(body);
 		arg0.setOut(out);

@@ -3,6 +3,7 @@ package main;
 
 import hipchat.HipchatMessageProcessor;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import mongodb.MongoByArtistProcessor;
@@ -207,18 +208,25 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
 
-		//     from("timer://runOnce?repeatCount=1&delay=5000")
-		//     .to("direct:testFindAll");
-		//     .to("direct:testInsert");
-		//     .to("direct:testFindById");
+//		     from("timer://runOnce?repeatCount=1&delay=5000")
+//		     .to("direct:testFindAll");
+//		     .to("direct:testInsert");
+//		     .to("direct:testFindById");
 		//     .to("direct:testRemove");
-		//     .to("direct:mongoGetArtists");       
+		//     .to("direct:mongoGetArtists");
+		     
+		HashMap<String,HashMap<String,String>> mongoTest = new HashMap<String,HashMap<String,String>>();
+		HashMap<String,String> mongoTest2 = new HashMap<String,String>();
+		mongoTest2.put("Foo", "Bar");
+		mongoTest.put("St. Pölten", mongoTest2);
+		mongoTest.put("Wien", mongoTest2);
 
 		from("direct:testInsert")
 		.setHeader("artist")
-		.simple("blind guardian")
+		.simple("Motörhead")
 		.setHeader("type")
-		.simple("test3")
+		.simple("schön")
+		.setBody().constant(mongoTest)
 		.process(new MongoInsertProcessor())
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=save"));
@@ -235,9 +243,9 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		from("direct:testFindById")
 		.setHeader("artist")
-		.simple("blind guardian")
+		.simple("Motörhead")
 		.setHeader("type")
-		.simple("test")      
+		.simple("schön")      
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFixArtistString())
@@ -250,7 +258,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("test")      
+		.simple("schön")      
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findAll"))
 		.to("log:mongo:findAll1?level=INFO")
