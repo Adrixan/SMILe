@@ -15,16 +15,19 @@ public class MongoResultProcessor implements Processor{
 	public void process(Exchange arg0) throws Exception {
 		Message out = arg0.getIn().copy();
 
+		HashMap<String, ?> hm;
 		HashMap body = new HashMap();
-		DBObject DbObj = new BasicDBObject();
+		
 		if (arg0.getIn().getBody() != null) {
 			System.out.println("found artist: " + out.getHeader("artist"));
-			
-//			StringToHashMap sthm = new StringToHashMap();
-//			body = sthm.StringToHashMap(arg0.getIn().getBody().toString());
-			
-			DbObj = (DBObject) arg0.getIn().getBody();
-			body = (HashMap) DbObj.toMap();
+		
+			hm = (HashMap) ((DBObject) arg0.getIn().getBody()).toMap();
+			hm.forEach( (k,v) -> body.put(k.toString().replaceAll("\\[p\\]", "."), v));
+			body.forEach( (k,v) -> {
+				if (v.toString().contains("{")){
+					body.put(k, (HashMap) ((DBObject) v).toMap());
+				}
+			});
 		}
 
 		String artist;		

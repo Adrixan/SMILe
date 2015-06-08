@@ -21,14 +21,19 @@ public class MongoInsertProcessor implements Processor {
 		System.out.println("insert artist: " + out.getHeader("artist"));
 		System.out.println("insert type: " + out.getHeader("type"));
 		HashMap hm = new HashMap();
+		DBObject insertObj = new BasicDBObject();
+		try {
+			hm = (HashMap) arg0.getIn().getBody();
+			HashMap insertMap = new HashMap();
+			
+			hm.forEach( (k,v) -> insertMap.put(k.toString().replaceAll("\\.", "[p]"), v));
+			insertMap.put("_id", (String) out.getHeader("type"));
+			insertObj = new BasicDBObject(insertMap);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		hm = (HashMap) arg0.getIn().getBody();
-		HashMap insertMap = new HashMap();
-		
-		hm.forEach( (k,v) -> insertMap.put(k.toString().replaceAll("\\.", "[p]"), v));
-		insertMap.put("_id", (String) out.getHeader("type"));
-		DBObject insertObj = new BasicDBObject(insertMap);
-
 		out.setBody(insertObj);
 		arg0.setOut(out);
 	}

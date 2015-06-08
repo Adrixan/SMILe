@@ -296,8 +296,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		HashMap<String,HashMap<String,String>> mongoTest = new HashMap<String,HashMap<String,String>>();
 		HashMap<String,String> mongoTest2 = new HashMap<String,String>();
 		mongoTest2.put("Foo", "Bar");
+		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
+		mongoTest3.put("Fun", "Park");
 		mongoTest.put("St. Pölten", mongoTest2);
-		mongoTest.put("Wien", mongoTest2);	
+		mongoTest.put("Wien", mongoTest3);
+		mongoTest.put("New York", mongoTest2);	
 		
 		from("direct:testInsert")
 		.setHeader("artist")
@@ -321,11 +324,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		from("direct:testFindById")
 		.setHeader("artist")
-		.simple("Motörhead")
+		.simple("blind guardian")
 		.setHeader("type")
 		.simple("schön")    
-		.setHeader("location")
-		.simple("St. Pölten")
+//		.setHeader("location")
+//		.simple("St. Pölten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())
