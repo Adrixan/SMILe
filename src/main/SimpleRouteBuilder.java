@@ -1,6 +1,7 @@
 package main;
 
 
+import helper.DeadLetterProcessor;
 import hipchat.HipchatMessageProcessor;
 
 import java.util.HashMap;
@@ -42,6 +43,14 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		Properties p = Launcher.properties;
+		//Set DeadLetterChannel Route
+		errorHandler(deadLetterChannel("direct:DLCRoute"));
+		
+		//DeadLetterChannel
+		from("direct:DLCRoute")
+		.process(new DeadLetterProcessor())
+		.to("file:dlc?fileName=exception_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		
 		// Enable global metrics support
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);

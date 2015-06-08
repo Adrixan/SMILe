@@ -13,6 +13,7 @@ hs_err_pid*
 /in/
 /out/
 /fm-out/
+/dlc/
 
 # Properties #
 *.properties
