@@ -22,6 +22,9 @@ import java.util.Properties;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+
+import main.Launcher;
+
 // import org.apache.commons.codec.binary.Base64;
 import java.util.Base64;
 
@@ -53,7 +56,9 @@ public class SignedRequestsHelper {
 		byte[] secretyKeyBytes;
 
 		// SWOBI: get the endpoint and keys from the properties file
-		try {
+/*
+ 		try {
+ 
 			props.load(new FileInputStream("smile.properties"));
 		} catch (FileNotFoundException e) {
 			System.out.println("FATAL: File smile.properties not found.");
@@ -64,10 +69,10 @@ public class SignedRequestsHelper {
 			System.exit(1);
 			// e.printStackTrace();
 		}
-
-		endpoint = props.getProperty("amazon.endpoint");
-		awsAccessKeyId = props.getProperty("amazon.awsAccessKeyId");
-		awsSecretKey = props.getProperty("amazon.awsSecretKey"); 
+*/
+		endpoint = Launcher.properties.getProperty("amazon.endpoint");
+		awsAccessKeyId = Launcher.properties.getProperty("amazon.awsAccessKeyId");
+		awsSecretKey = Launcher.properties.getProperty("amazon.awsSecretKey"); 
 
 		secretyKeyBytes = awsSecretKey.getBytes(UTF8_CHARSET);
 		secretKeySpec = new SecretKeySpec(secretyKeyBytes, HMAC_SHA256_ALGORITHM);
@@ -96,10 +101,11 @@ public class SignedRequestsHelper {
 
 		String hmac = hmac(toSign);
 		String sig = percentEncodeRfc3986(percentEncodeRfc3986(hmac)); 
+//		String sig = percentEncodeRfc3986(hmac); 
 
-		//    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
+		    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
 
-		String signedParams = canonicalQS + "&Signature=" + sig;
+//      String signedParams = canonicalQS + "&Signature=" + sig;
 
 		return signedParams;  
 	}
