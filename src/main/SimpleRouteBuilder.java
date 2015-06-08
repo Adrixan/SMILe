@@ -6,7 +6,9 @@ import hipchat.HipchatMessageProcessor;
 import java.util.HashMap;
 import java.util.Properties;
 
+import mongodb.MongoAggregationStrategy;
 import mongodb.MongoByArtistProcessor;
+import mongodb.MongoFilterProcessor;
 import mongodb.MongoFixArtistString;
 import mongodb.MongoInsertProcessor;
 import mongodb.MongoResultProcessor;
@@ -17,7 +19,15 @@ import lastFM.EventFinder;
 import metrics.MetricsProcessor;
 
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
+import org.apache.camel.component.mongodb.MongoDbConstants;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
+
+import amazon.AmazonAggregationStrategy;
+import amazon.AmazonMongoTester;
+import amazon.AmazonRequestCreator;
 import subscriptionhandler.EmailModifyProcessor;
 import subscriptionhandler.EmailSubscribeProcessor;
 import subscriptionhandler.EmailUnsubscribeProcessor;
@@ -149,11 +159,38 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			//"smtps://myname@gmx.at?password=secretpw&to=recipient@mail.com"
 
 		 */
+		
+
+		// Amazon grabber starts here
+		from("timer://foo?repeatCount=1&delay=0")
+		.setBody(simple("select distinct(artist) from subscriptions"))
+		.to("jdbc:accounts?outputType=StreamList")
+		.split(body()).streaming()
+		.setBody(body().regexReplaceAll("\\{artist= (.*)(\\r)?\\}", "$1"))
+		.setHeader("artist").body()
+		.to("direct:amazon");
+
+		// Amazon Route
+		from("direct:amazon")
+		.to("metrics:timer:amazon-process.timer?action=start")
+		.process(new AmazonRequestCreator())
+		.recipientList(header("amazonRequestURL")).ignoreInvalidEndpoints()
+		.split().tokenizeXML("Item").streaming()
+		.setHeader("amazon_uid").xpath("/Item/ASIN/text()", String. class)
+		.setHeader("amazon_title").xpath("/Item/ItemAttributes/Title/text()", String. class)
+		.setHeader("amazon_pageurl").xpath("/Item/DetailPageURL/text()", String. class)
+		.setHeader("amazon_imageurl").xpath("/Item/LargeImage/URL/text()", String. class)
+		.setHeader("amazon_price").xpath("/Item/OfferSummary/LowestNewPrice[1]/FormattedPrice/text()", String. class)
+		.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
+		.to("metrics:timer:amazon-process.timer?action=stop")
+		.process(new AmazonMongoTester())
+		.to("direct:mongoInsert");		
+		
+		
 		//Inserts data about artist into MongoDB overwrites if already existing
 		from("direct:mongoInsert")
 		.to("metrics:timer:mongo-insert.timer?action=start")
-		.choice()
-		.when(body().isNotEqualTo("{}"))
+		.filter(body().isNotEqualTo("{}"))
 		.process(new MongoInsertProcessor())
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=save"))
@@ -177,14 +214,46 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:chooseCall")
 		.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end();
 
+		
 		//gets all data for a single Artist
-		//atm still returns multiple messages
+		//routes to mongoGetTwitterYTAmazon and
+		//mongoGetLastFM
 		from("direct:mongoGetFullArtist")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=start")
+		.multicast().to("direct:mongoGetTwitterYTAmazon", "direct:mongoGetLastFM");
+		
+		String in[] = new String[] {"twitter", "youtube", "amazon"};
+		DBObject querryHelper = BasicDBObjectBuilder.start().add("$in", in).get();
+		DBObject querry = BasicDBObjectBuilder.start().add("_id", querryHelper).get();			
+		
+		//gets data for single artist for twitter
+		//amazon and youtube. Needs to be don seperatly
+		//so we can filter for location in lastFM route
+		from("direct:mongoGetTwitterYTAmazon")
+		.setBody().constant(querry)
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findAll"))
 		.split().body()
 		.process(new MongoResultProcessor())
+		.to("direct:endMongoGetFullArtist");
+
+		
+		//gets data for a single artist from
+		//lastFM add header "location" to filter
+		//by location
+		from("direct:mongoGetLastFM")
+		.setBody()
+		.simple("lastFM")
+		.process(new MongoFixArtistString())
+		.process(new MongoFilterProcessor())
+		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
+		.process(new MongoResultProcessor())
+		.to("direct:endMongoGetFullArtist");
+		
+		
+		//Aggregates the messages for FullArtist 
+		from("direct:endMongoGetFullArtist")
+		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000)
 		.to("metrics:counter:mongo-getFullArtist.counter")
 		.to("mock:sortArtists")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=stop");
@@ -219,11 +288,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		HashMap<String,String> mongoTest2 = new HashMap<String,String>();
 		mongoTest2.put("Foo", "Bar");
 		mongoTest.put("St. Pölten", mongoTest2);
-		mongoTest.put("Wien", mongoTest2);
-
+		mongoTest.put("Wien", mongoTest2);	
+		
 		from("direct:testInsert")
 		.setHeader("artist")
-		.simple("Motörhead")
+		.simple("blind guardian")
 		.setHeader("type")
 		.simple("schön")
 		.setBody().constant(mongoTest)
@@ -245,26 +314,34 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("Motörhead")
 		.setHeader("type")
-		.simple("schön")      
+		.simple("schön")    
+		.setHeader("location")
+		.simple("St. Pölten")
 		.setBody()
 		.simple("${header.type}")
+		.process(new MongoFilterProcessor())
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findById"))
 		.to("log:mongo:findById1?level=INFO")
 		.process(new MongoResultProcessor())
 		.to("log:mongo:findById2?level=INFO");
 
+		String hin[] = new String[] {"test", "test3"};
+		DBObject helper = BasicDBObjectBuilder.start().add("$in", hin).get();
+		DBObject testQuerry = BasicDBObjectBuilder.start().add("_id", helper).get();		
+		
 		from("direct:testFindAll")
 		.setHeader("artist")
 		.simple("blind guardian")
-		.setHeader("type")
-		.simple("schön")      
+//		.setBody().constant(testQuerry)
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findAll"))
 		.to("log:mongo:findAll1?level=INFO")
 		.split().body()
+		.to("log:mongo:findAll2?level=INFO")   
 		.process(new MongoResultProcessor())
-		.to("log:mongo:findAll2?level=INFO");    	
+		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000)
+		.to("log:mongo:findAll3?level=INFO");    	
 
 	}  
 }
