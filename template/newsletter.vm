@@ -48,6 +48,8 @@ The following albums are on sale:
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+#end
+
  ${body} 
  This is an auto generated email. You cannot reply.
  

@@ -3,17 +3,26 @@ package hipchat;
 import java.util.HashMap;
 import java.util.Map;
 
+import newsletter.NewsletterProcessor;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HipchatMessageProcessor implements Processor {
 
+	private static final Logger logger = LoggerFactory.getLogger(HipchatMessageProcessor.class);
+	
 	@Override
 	public void process(Exchange arg0) throws Exception {
 		String input = ((HashMap<String,String>) arg0.getIn().getBody()).get("list");
+		
+		System.out.println("Playlist: "+input.toString());
+		logger.info("#######################################Playlist: "+input.toString());
 		
 		Map<String,Object> headers = arg0.getIn().getHeaders();
 		
