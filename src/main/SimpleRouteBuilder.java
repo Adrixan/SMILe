@@ -173,35 +173,14 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 //		from("timer:newsletter?period=86400000") //can be set to specific time "time=yyyy-MM-dd HH:mm:ss" or just set the period to one day "period=86400000"
 //		.log("--------------------timer fired..--------------------------------").
-//		bean(flightOfferDAO , "getTodaysFlightoffers").id("flightOfferBean").
+
 //		split(body()).
-//		pollEnrich("bean:hotelDAO?method=getAllHotels", new HotelAggregationStrategy()).process(new PrintListFlightoffer()).
+
 //		process(enrichWithSubscribers).
 //		to("velocity:file:template/newsletter.vm").id("velocityTemplate").
-//		to("smtp://188.40.32.121?username=workflow@seferovic.net&password=workflowpassword&contentType=text/html").
+//		to("smtp://").
 //		log("-------------------FINISHED--------------------------------------");
 
-		
-//		from("direct:mongoCache")
-//		.log(LoggingLevel.INFO, "Load MongoDB in the Cache")
-//		.setHeader(CacheConstants.CACHE_OPERATION,
-//				constant(CacheConstants.CACHE_OPERATION_DELETEALL))
-//		.to("mongodb:mongoBean?database=event2be&collection=Activity&operation=findAll")
-//		.setHeader(CacheConstants.CACHE_OPERATION,
-//				constant(CacheConstants.CACHE_OPERATION_ADD))
-//		.setHeader(CacheConstants.CACHE_KEY, constant("Recommendation"))
-//		.to("cache://elementCache").end();
-//		
-		//Poll Weather
-//				from("timer://timerWeather?fixedRate=true&period=86 400s")
-//			    .to("weather://weatherData?location=Vienna,Austria&mode=XML")
-//			    .setHeader(CacheConstants.CACHE_OPERATION, constant(CacheConstants.CACHE_OPERATION_ADD))
-//			    .setHeader(CacheConstants.CACHE_KEY, constant("Weather"))
-//				.to("cache://weatherCache")
-//				.end();
-		//enrich weather data
-//				from("seda:ActivityChannel")
-//				.pollEnrich("cache://weatherCache", weatherEnrichAggregation)
 		
 		/// test
 		from("timer://newsletter?repeatCount=1&delay=0")
@@ -242,15 +221,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 //.header("artist")
 		.completionInterval(15000)
 	    .log("********************** Aggregator ALL  **************************")
-//	    .process(new Processor() {
-//	                   @Override
-//	                   public void process(Exchange exchange) throws Exception {
-//	                       logger.debug("All INC: " + exchange.getIn().getBody(String.class));
-//	                   }
-//	               })
-//	       .pollEnrich("{{newsletter.pollEnrich}}" +
-//	               "", new NewsletterEnrichAS())
-//	       .to("{{global.smtp}}");
 	    .log("------------------Sending Newsletter to File")
 		.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
