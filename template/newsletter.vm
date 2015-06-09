@@ -1,0 +1,58 @@
+Hello ${headers.subscriber}
+
+ 
+Thanks for using and searching with SMILe.
+
+ #foreach ($artist in $body)
+
+The following news for the artist '${headers.artist}' are provided: 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        Twitter 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Recent Tweets for artist '${headers.artist}': 
+ ${body.twitterSection}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        YouTube 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Your personalized Youtube-Playlist for artist '${headers.artist}':
+ ${body.youtubeSection}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        Last.FM 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The following events are upcoming in your town (searched for
+given location '${headers.location}'):
+ ${body.lastFMSection}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        Amazon	 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The following albums are on sale:
+ ${body.amazonSection}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ${body} 
+ This is an auto generated email. You cannot reply.
+ 
+ 
+Best Regards 
+
+Your SMILe-Team  ;-)
+

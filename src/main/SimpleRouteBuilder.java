@@ -13,7 +13,12 @@ import mongodb.MongoResultProcessor;
 import org.apache.camel.builder.RouteBuilder;
 
 import lastFM.EventFinder;
+import lastFM.LastFMProcessor;
+import lastFM.LastFMSplitExpression;
 import metrics.MetricsProcessor;
+import newsletter.EnrichWithSubscribers;
+import newsletter.GrabberAggregationStrategy;
+import newsletter.NewsletterFullArtist;
 
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
 
@@ -132,8 +137,126 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		//.to("file:out?fileName=metrics_${date:now:yyyyMMdd_HHmmssSSS}.json");
 
-		// Versuch Velocity //from("direct:a").to("velocity:org/apache/camel/component/velocity/letter.vm").to("mock:result");
+		// Versuch Velocity 
+//		from("direct:a").
+//		//to("velocity:org/apache/camel/component/velocity/letter.vm")
+//		to("velocity:file:template/newsletter.vm")
+//		.to("mock:result");
 
+		/**
+		 **--------------------
+		 **Newsletter-Mail-Route
+		 **--------------------
+		 */
+		
+		EnrichWithSubscribers enrichWithSubscribers;
+		
+//		from("timer:newsletter?period=86400000") //can be set to specific time "time=yyyy-MM-dd HH:mm:ss" or just set the period to one day "period=86400000"
+//		.log("--------------------timer fired..--------------------------------").
+//		bean(flightOfferDAO , "getTodaysFlightoffers").id("flightOfferBean").
+//		split(body()).
+//		pollEnrich("bean:hotelDAO?method=getAllHotels", new HotelAggregationStrategy()).process(new PrintListFlightoffer()).
+//		process(enrichWithSubscribers).
+//		to("velocity:file:template/newsletter.vm").id("velocityTemplate").
+//		to("smtp://188.40.32.121?username=workflow@seferovic.net&password=workflowpassword&contentType=text/html").
+//		log("-------------------FINISHED--------------------------------------");
+
+		
+//		from("direct:mongoCache")
+//		.log(LoggingLevel.INFO, "Load MongoDB in the Cache")
+//		.setHeader(CacheConstants.CACHE_OPERATION,
+//				constant(CacheConstants.CACHE_OPERATION_DELETEALL))
+//		.to("mongodb:mongoBean?database=event2be&collection=Activity&operation=findAll")
+//		.setHeader(CacheConstants.CACHE_OPERATION,
+//				constant(CacheConstants.CACHE_OPERATION_ADD))
+//		.setHeader(CacheConstants.CACHE_KEY, constant("Recommendation"))
+//		.to("cache://elementCache").end();
+//		
+		//Poll Weather
+//				from("timer://timerWeather?fixedRate=true&period=86 400s")
+//			    .to("weather://weatherData?location=Vienna,Austria&mode=XML")
+//			    .setHeader(CacheConstants.CACHE_OPERATION, constant(CacheConstants.CACHE_OPERATION_ADD))
+//			    .setHeader(CacheConstants.CACHE_KEY, constant("Weather"))
+//				.to("cache://weatherCache")
+//				.end();
+		//enrich weather data
+//				from("seda:ActivityChannel")
+//				.pollEnrich("cache://weatherCache", weatherEnrichAggregation)
+		
+		/// test
+		from("timer://newsletter?repeatCount=1&delay=0")
+		.log("--------------------timer fired..--------------------------------")
+	//	.setHeader("type", simple("youtube"))
+		.setHeader("caller", simple("newsletter"))
+		.setBody(simple("select email from subscriber"))
+		.to("jdbc:accounts")
+		.split(body())
+		.setBody(body().regexReplaceAll("\\{email=(.*)(\\r)?\\}", "$1"))
+		.to("direct:getArtistsForNewsletter")
+		.log("-------------------FINISHED--------------------------------------");
+		
+		from("direct:getArtistsForNewsletter")
+		.log("--------------------getArtistsForNewsletter..--------------------------------")
+		.setHeader("subscriber", body())
+		.setBody(simple("select artist from subscriptions where email = '${body}'"))
+	// toDO: Locations rausfiltern -> Kreuzprodukt
+	// .setBody(simple("select artist from subscriptions where email = '${body}'"))
+	//.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
+		.to("jdbc:accounts")
+		.split(body())
+		.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
+		.setHeader("artist",body())
+		.to("file:fm-out?fileName=getArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt")
+		.to("direct:mongoGetFullArtist");
+		//.to("direct:mongoGetArtist");
+		
+//		from("direct:sendNewsletter")
+//		.log("--------------------sendNewsletter..--------------------------------")
+		//.setHeader("youtube", body())
+		//.setHeader("type", simple("twitter"))
+//		.log("------------------Sending Newsletter to File")
+		//.to("file:fm-out?fileName=getPlaylist_${date:now:yyyyMMdd_HHmmssSSS}.txt")
+//		.to("direct:mongoGetFullArtist");
+		
+		from("direct:aggregateAll").aggregate(header("artist"), new NewsletterFullArtist())
+//.header("artist")
+		.completionInterval(15000)
+	    .log("********************** Aggregator ALL  **************************")
+//	    .process(new Processor() {
+//	                   @Override
+//	                   public void process(Exchange exchange) throws Exception {
+//	                       logger.debug("All INC: " + exchange.getIn().getBody(String.class));
+//	                   }
+//	               })
+//	       .pollEnrich("{{newsletter.pollEnrich}}" +
+//	               "", new NewsletterEnrichAS())
+//	       .to("{{global.smtp}}");
+	    .log("------------------Sending Newsletter to File")
+		.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		
+//		.pollEnrich("direct:mongoGetArtist", new GrabberAggregationStrategy())
+		//.setHeader("Newsletter",simple("newsletter-generation"))
+		//.setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}
+	//	.process(new LastFMProcessor()).split(new LastFMSplitExpression())
+		
+		
+//		.setHeader("Subject", constant("Thanks for ordering"))
+//		.setHeader("From", constant("donotreply@riders.com"))
+		//.process(new HipchatMessageProcessor())
+		//.to("velocity:file:template/newsletter.vm")
+//		.to("velocity:file:template/newsletter.vm")
+//		.split(new LastFMSplitExpression())
+//		.to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+	//	.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user") +"&to="+p.getProperty("email.user")); 
+
+		
+// end testing
+
+		
+		
+		
+		
+		
 		from("file:fm-in?noop=true")
 		.log("Working on file ${header.CamelFileName}")
 		.setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}
@@ -174,7 +297,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		// Routing for results from MongoDB
 		from("direct:chooseCall")
-		.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end();
+		.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end()
+		.choice().when(header("caller").isEqualTo("newsletter")).to("direct:sendNewsletter").end();
 
 		//gets all data for a single Artist
 		//atm still returns multiple messages
@@ -185,9 +309,13 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.split().body()
 		.process(new MongoResultProcessor())
 		.to("metrics:counter:mongo-getFullArtist.counter")
-		.to("mock:sortArtists")
+	//	.to("mock:sortArtists")
+		.to("direct:chooseCallFullArtist")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=stop");
-
+		
+		from("direct:chooseCallFullArtist")
+	//	.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end()
+		.choice().when(header("caller").isEqualTo("newsletter")).to("direct:aggregateAll");
 
 		// First try to get multiple artists not sure if we need it
 		//       from("direct:mongoGetFullArtists")
