@@ -221,7 +221,9 @@ public class SimpleRouteBuilder extends RouteBuilder {
 					//.to("file:fm-out?fileName=getPlaylist_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 //		.to("direct:mongoGetFullArtist");
 		
-		from("direct:aggregateAll").aggregate(header("artist"), new NewsletterFullArtist())
+		from("direct:aggregateAll")
+	//	.split(body())
+		.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
 		.completionInterval(5000)
 	    .log("********************** Aggregator ALL  **************************")
 	    .log("------------------Sending Newsletter to File")
@@ -362,7 +364,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		//Aggregates the messages for FullArtist 
 		from("direct:endMongoGetFullArtist")
-		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000)
+		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
 		.to("metrics:counter:mongo-getFullArtist.counter")
 	//	.to("mock:sortArtists")
 		.to("direct:chooseCallFullArtist")
