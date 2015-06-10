@@ -1,0 +1,17 @@
+Hello ${headers.subscriber}
+
+ 
+Thanks for using and searching with SMILe.
+
+
+The following news for the artist '${headers.artist}' are provided: 
+
+
+ ${body} 
+ This is an auto generated email. You cannot reply.
+ 
+
+Best Regards 
+
+Your SMILe-Team  ;-)
+
