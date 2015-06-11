@@ -36,16 +36,11 @@ public class ArtistFinder implements Processor {
 		.setOAuthAccessTokenSecret(p.getProperty("twitter.accesstokensecret"));
 
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-		try {
 
-			ResponseList<User> users = twitter.searchUsers(body, 0);
-			User u = users.get(0);
+		ResponseList<User> users = twitter.searchUsers(body, 0);
+		User u = users.get(0);
 
-			m.setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
-
-		} catch (TwitterException te) {
-			te.printStackTrace();
-		}
+		m.setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
 
 	}
 
