@@ -170,8 +170,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		/* TODO:
 		 * Artist-Pojo Klasse verfeinern
 		 * richtig aggregieren: momentan pro Artist eine Message (Ellie Goulding wird einmal mit anderen Location geschluckt)
-		 * -> es müssen alle Artists von einem Subscriber in einer Message sein
-		 * Überlegung, wie Pojo bzw. Template aussieht (welche Teile dynamisch: beispiel Last.fm -> wenn kein Event stattfindet)
+		 * -> es mï¿½ssen alle Artists von einem Subscriber in einer Message sein
+		 * ï¿½berlegung, wie Pojo bzw. Template aussieht (welche Teile dynamisch: beispiel Last.fm -> wenn kein Event stattfindet)
 		 * Mail mit Subscriber enrichen (from, to, subject) als Header setzen
 		 * Senden via SMTP 
 		 * */
@@ -208,7 +208,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new SubscriberLocationProcessor())
 		.split(body())
 		.process(new HeaderChangerProcessor())
-			// für Testzwecke
+			// fï¿½r Testzwecke
 			//.convertBodyTo(String.class)
 			//.to("file:fm-out?fileName=getArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 		.to("direct:mongoGetFullArtist");
@@ -275,7 +275,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("jdbc:accounts?outputType=StreamList")
 		.split(body()).streaming()
 		.setBody(body().regexReplaceAll("\\{artist= (.*)(\\r)?\\}", "$1"))
-		.setHeader("artist").body()
+		.setHeader("artist",body())
 		.to("direct:amazon");
 
 		// Amazon Route
@@ -364,7 +364,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		//Aggregates the messages for FullArtist 
 		from("direct:endMongoGetFullArtist")
-		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
+		.aggregate(header("artist").append(header("subscriber")), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
 		.to("metrics:counter:mongo-getFullArtist.counter")
 	//	.to("mock:sortArtists")
 		.to("direct:chooseCallFullArtist")
@@ -404,7 +404,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		mongoTest2.put("Foo", "Bar");
 		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
 		mongoTest3.put("Fun", "Park");
-		mongoTest.put("St. Pölten", mongoTest2);
+		mongoTest.put("St. Pï¿½lten", mongoTest2);
 		mongoTest.put("Wien", mongoTest3);
 		mongoTest.put("New York", mongoTest2);	
 		
@@ -412,7 +412,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("schön")
+		.simple("schï¿½n")
 		.setBody().constant(mongoTest)
 		.process(new MongoInsertProcessor())
 		.process(new MongoFixArtistString())
@@ -432,9 +432,9 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("schön")    
+		.simple("schï¿½n")    
 //		.setHeader("location")
-//		.simple("St. Pölten, Wien")
+//		.simple("St. Pï¿½lten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())
