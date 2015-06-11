@@ -15,7 +15,6 @@ public class YoutubeChannelProcessor implements Processor {
 		//get the artist from the body
 		String artist = (String) m.getHeader("artist");
 		
-		//System.out.println("Artist: "+artist);
 
 		//Set the body to the playlist info
 		PlaylistFinder finder = new PlaylistFinder(artist);

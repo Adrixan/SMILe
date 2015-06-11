@@ -18,8 +18,6 @@ public class MongoInsertProcessor implements Processor {
 	public void process(Exchange arg0) throws Exception {
 		Message out = arg0.getIn().copy();
 
-		System.out.println("insert artist: " + out.getHeader("artist"));
-		System.out.println("insert type: " + out.getHeader("type"));
 		HashMap hm = new HashMap();
 		DBObject insertObj = new BasicDBObject();
 		try {

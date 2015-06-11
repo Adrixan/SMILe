@@ -103,7 +103,6 @@ public class PlaylistFinder {
 		//builder.append("Artist Name: " + artistName + "\n");
 
 		if (!iteratorSearchResults.hasNext()) {
-			// System.out.println(" There aren't any results for your query.");
 			throw new Exception("There aren't any results for your query.");
 		}
 
@@ -145,13 +144,6 @@ public class PlaylistFinder {
 
 		}
 
-		if (DEBUG) {
-			System.out
-			.println("//////////////////////////////////////////////////////////////////////////////");
-			System.out.println("/////// BEST MATCH");
-			System.out
-			.println("//////////////////////////////////////////////////////////////////////////////\n");
-		}
 		playlistInfo.put("channel", "http://www.youtube.com/channel/" + bestMatch.getId());
 		playlistInfo.put("title", bestMatch.getSnippet().getTitle());
 		playlistInfo.put("subscribers", bestMatch.getStatistics().getSubscriberCount().toString());
@@ -159,11 +151,5 @@ public class PlaylistFinder {
 				+ bestMatch.getContentDetails().getRelatedPlaylists()
 				.getUploads());
 	}
-
-//	private void appendPrintln(StringBuilder builder, String string) {
-//		builder.append(string + "\n");
-//		if (DEBUG)
-//			System.out.println(string);
-//	}
 
 }
