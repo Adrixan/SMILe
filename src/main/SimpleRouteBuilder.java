@@ -222,7 +222,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 //		.to("direct:mongoGetFullArtist");
 		
 		from("direct:aggregateAll")
-	//	.split(body())
+				//	.split(body())
 		.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
 		.completionInterval(5000)
 	    .log("********************** Aggregator ALL  **************************")
