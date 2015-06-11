@@ -32,7 +32,7 @@ public class EventFinder implements Processor {
      /*   if(body.get("location").contains("oe")){
         	locationFromBody=body.get("location").replaceAll("oe", "�");
         }*/
-		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist"), body.get("location"));//locationFromBody);
+		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist").trim(), body.get("location").trim());//locationFromBody);
 		//List<pojo.Event> eventList = lfm.getUpcomingEventsInGeo(body.get("artist"), body.get("location"));
 		
 		// TODO: �berpr�fung, wenn keine Events vorhanden -> Dead Letter Channel

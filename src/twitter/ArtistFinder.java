@@ -32,7 +32,7 @@ public class ArtistFinder implements Processor {
 
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
 
-		ResponseList<User> users = twitter.searchUsers(((String) arg0.getIn().getHeader("artist")).trim(), 0);
+		ResponseList<User> users = twitter.searchUsers(arg0.getIn().getHeader("artist").toString(), 0);
 		User u = users.get(0);
 
 		arg0.getIn().setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());

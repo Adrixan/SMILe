@@ -62,6 +62,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		// Enable global metrics support
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
+		
+		from("direct:wiretapLogging").setBody(simple("${headers}\n\n${body}")).convertBodyTo(String.class).to("file:out?fileName=WiretapLogging_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 		// Subscription handling
 		from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
@@ -89,17 +91,21 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setBody(simple("select distinct(artist) from subscriptions"))
 		.to("jdbc:accounts")
 		.split(body())
-		.process(new ArtistDefiner()).multicast()
+		.process(new ArtistDefiner()).wireTap("direct:wiretapLogging").throttle(1).timePeriodMillis(1000)
+		.multicast().parallelProcessing()
 		.to("direct:twittergrabber", "direct:youtubeAPI", "direct:amazon")
 		.to("metrics:timer:all-grabbers.timer?action=stop");
 
 
 		// we can only get tweets from the last 8 days here!!!
 		from("direct:twittergrabber")
+		.setHeader("type",simple("twitter"))
+		.wireTap("direct:wiretapLogging")
 		.process(new ArtistFinder())
 		.to("twitter://search?consumerKey="+ p.getProperty("twitter.consumerkey")+"&consumerSecret="+p.getProperty("twitter.consumersecret")+"&accessToken="+p.getProperty("twitter.accesstoken")+"&accessTokenSecret="+p.getProperty("twitter.accesstokensecret"))
 		.process(new TweetProcessor())
 		.to("metrics:counter:twitter-artists-processed.counter")
+		.wireTap("direct:wiretapLogging")
 		.to("direct:mongoInsert");
 
 		// Hipchat playlist workflow
@@ -145,6 +151,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		// Youtube grabber starts here
 
 		from("direct:youtubeAPI")
+			.setHeader("type",simple("youtube"))
 			.process(new YoutubeChannelProcessor())
 			.to("metrics:counter:YouTube-Playlists-generated.counter")
 			.to("direct:mongoInsert");
@@ -270,6 +277,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		// Amazon Route
 		from("direct:amazon")
+		.setHeader("type",simple("amazon"))
+		.wireTap("direct:wiretapLogging")
 		.to("metrics:timer:amazon-process.timer?action=start")
 		.process(new AmazonRequestCreator())
 		.recipientList(header("amazonRequestURL")).ignoreInvalidEndpoints()
@@ -281,6 +290,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("amazon_price").xpath("/Item/OfferSummary/LowestNewPrice[1]/FormattedPrice/text()", String. class)
 		.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
 		.to("metrics:timer:amazon-process.timer?action=stop")
+		.wireTap("direct:wiretapLogging")
 		.process(new AmazonMongoTester())
 		.to("direct:mongoInsert");		
 		
