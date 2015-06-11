@@ -62,6 +62,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
 
+		// Subscription handling
 		from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
 		.choice()
 		.when(header("Subject").isEqualTo("subscribe")).to("direct:subscribe")
@@ -74,18 +75,21 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:modify").process(new EmailModifyProcessor()).to("metrics:counter:modify.counter").to("direct:writedb");
 
 		from("direct:writedb").to("metrics:timer:RDBM-write.timer?action=start")
-		.split(new SqlSplitExpression()).wireTap("file:out").end().to("jdbc:accounts").to("metrics:counter:RDBM-write.counter").end()
+		.split(new SqlSplitExpression()).to("jdbc:accounts").to("metrics:counter:RDBM-write.counter").end()
 		.to("metrics:timer:RDBM-write.timer?action=stop");
-
+		
+		//Grabbers
+		
+		// Launch all grabbers
 		from("timer://foo2?repeatCount=1&delay=0")
-		.to("metrics:timer:twitter-process.timer?action=start")
+		.to("metrics:timer:all-grabbers.timer?action=start")
 		.setBody(simple("select distinct(artist) from subscriptions"))
 		.to("jdbc:accounts")
 		.split(body())
-		.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-		.process(new ArtistFinder())
-		.to("direct:twittergrabber")
-		.to("metrics:timer:twitter-process.timer?action=stop");
+		.setBody(body().regexReplaceAll("\\{artist= ?(.*)(\\r)?\\}", "$1"))
+		.process(new ArtistFinder()).multicast()
+		.to("direct:twittergrabber", "direct:youtubeAPI", "direct:amazon")
+		.to("metrics:timer:all-grabbers.timer?action=stop");
 
 
 		// we can only get tweets from the last 8 days here!!!
@@ -94,7 +98,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new TweetProcessor())
 		.to("metrics:counter:twitter-artists-processed.counter")
 		.to("direct:mongoInsert");
-// Aufruf des Processor (list) anpassen ?! -> funktionert diese bei euch? 
+
 		// Hipchat playlist workflow
 		from("timer://foo4?repeatCount=1&delay=0")
 		.to("metrics:timer:hipchat-process.timer?action=start")
@@ -136,16 +140,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 
 		// Youtube grabber starts here
-		from("timer://foo?repeatCount=1&delay=0")
-			.to("metrics:timer:youtube-process.timer?action=start")
-			.setBody(simple("select distinct(artist) from subscriptions"))
-			.to("jdbc:accounts?outputType=StreamList")
-			.split(body())
-			.streaming()
-			.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-			.process(new ArtistFinder())
-			.to("direct:youtubeAPI")
-			.to("metrics:timer:youtube-process.timer?action=stop");
 
 		from("direct:youtubeAPI")
 			.process(new YoutubeChannelProcessor())
@@ -270,13 +264,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 // Funktioniert diese bei euch? 
 		// Amazon grabber starts here
-		from("timer://foo?repeatCount=1&delay=0")
-		.setBody(simple("select distinct(artist) from subscriptions"))
-		.to("jdbc:accounts?outputType=StreamList")
-		.split(body()).streaming()
-		.setBody(body().regexReplaceAll("\\{artist= (.*)(\\r)?\\}", "$1"))
-		.setHeader("artist",body())
-		.to("direct:amazon");
 
 		// Amazon Route
 		from("direct:amazon")
