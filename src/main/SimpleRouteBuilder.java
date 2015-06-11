@@ -364,7 +364,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		//Aggregates the messages for FullArtist 
 		from("direct:endMongoGetFullArtist")
-		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
+		.aggregate(header("artist").append(header("subscriber")), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
 		.to("metrics:counter:mongo-getFullArtist.counter")
 	//	.to("mock:sortArtists")
 		.to("direct:chooseCallFullArtist")
