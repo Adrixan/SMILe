@@ -19,7 +19,6 @@ public class MongoResultProcessor implements Processor{
 		HashMap body = new HashMap();
 		
 		if (arg0.getIn().getBody() != null) {
-			System.out.println("found artist: " + out.getHeader("artist"));
 		
 			hm = (HashMap) ((DBObject) arg0.getIn().getBody()).toMap();
 			hm.forEach( (k,v) -> body.put(k.toString().replaceAll("\\[p\\]", "."), v));
@@ -33,7 +32,6 @@ public class MongoResultProcessor implements Processor{
 		String artist;		
 		artist = (String) out.getHeader("artist");
 		artist = artist.replaceAll("_", " ");  		
-//		System.out.println(body);
 		out.setHeader("artist", artist);
 		out.setBody(body);
 		arg0.setOut(out);

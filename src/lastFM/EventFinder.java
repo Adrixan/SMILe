@@ -24,28 +24,24 @@ public class EventFinder implements Processor {
 		String locationFromBody="";
 		
 		HashMap<String,String> body = (HashMap<String,String>) m.getBody();
-        
-			System.out.println("ARTIST:" + body.get("artist"));
 		
-		m.setHeader("artist", body.get("artist"));
+		m.setHeader("artist", body.get("artist").trim());
 		m.setHeader("type", "lastFM");
-        
-        System.out.println(""+p.getProperty("lastFM.apiKey"));
         
         LastFMService lfm = new LastFMService(body.get("artist"), p.getProperty("lastFM.apiKey"));
      /*   if(body.get("location").contains("oe")){
-        	locationFromBody=body.get("location").replaceAll("oe", "ö");
+        	locationFromBody=body.get("location").replaceAll("oe", "ï¿½");
         }*/
-		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist"), body.get("location"));//locationFromBody);
+		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist").trim(), body.get("location").trim());//locationFromBody);
 		//List<pojo.Event> eventList = lfm.getUpcomingEventsInGeo(body.get("artist"), body.get("location"));
 		
-		// TODO: Überprüfung, wenn keine Events vorhanden -> Dead Letter Channel
+		// TODO: ï¿½berprï¿½fung, wenn keine Events vorhanden -> Dead Letter Channel
 		
 		if(eventList.isEmpty()==false && !eventList.equals(null)){
-			System.out.println("Events gefunden");
+			Log.debug("Events gefunden");
 		}
 		else{
-			System.out.println("Keine Events gefunden");
+			Log.debug("Keine Events gefunden");
 		}
 		
 		//body setzen -> HM <Location, HM<Name von Event: Datum>>
@@ -66,7 +62,6 @@ public class EventFinder implements Processor {
 				}else{
 					website=e.getWebsite().toString();
 				}
-				System.out.println("Contains: "+e.getTitle().toString() + " "+e.getDate().toString()+ " "+website);
 				
 				hashi.put(e.getTitle().toString()+ " "+e.getDate().toString(), website);
 			}else{
@@ -78,14 +73,12 @@ public class EventFinder implements Processor {
 					website=e.getWebsite().toString();
 				}
 				
-				System.out.println("Not contains: "+e.getTitle().toString() + " "+e.getDate().toString()+ " "+website);
 				hashi.put(e.getTitle().toString()+" "+e.getDate().toString(), website);
 			}
-			System.out.println("location: "+location);
 			
-			// Ausgabe, welche Events für welchen Artist gespeicher wurden
+			// Ausgabe, welche Events fï¿½r welchen Artist gespeicher wurden
 			for (Entry<String, HashMap<String,String>> ent : eventsForMongo.entrySet()){
-				System.out.println("Last.FM: "+ent.getKey()+" und Value"+ent.getValue().toString());
+				Log.debug("Last.FM: "+ent.getKey()+" und Value"+ent.getValue().toString());
 			}
 			
 			eventsForMongo.put(location, hashi);

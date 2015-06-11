@@ -15,7 +15,7 @@ public class EmailModifyProcessor implements Processor {
 		Map<String,Object> headers = arg0.getIn().getHeaders();
 		Message out = arg0.getIn().copy();
 
-		String email = headers.get("From").toString();
+		String email = headers.get("From").toString().trim();
 
 		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
 		m.find();
@@ -26,14 +26,14 @@ public class EmailModifyProcessor implements Processor {
 		for(String s : arg0.getIn().getBody().toString().split("\n"))
 		{
 			if(s.startsWith("+Location:"))
-				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1] + "');\n";
+				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1].trim() + "');\n";
 			if(s.startsWith("+Artist:"))
-				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1] + "');\n";
+				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1].trim() + "');\n";
 
 			if(s.startsWith("-Location:"))
-				body +="Delete from locations where email='" + email +"' and location='" + s.split(":")[1] + "';\n";
+				body +="Delete from locations where email='" + email +"' and location='" + s.split(":")[1].trim() + "';\n";
 			if(s.startsWith("-Artist:"))
-				body +="Delete from subscriptions where email='" + email +"' and artist='" + s.split(":")[1] + "';\n";
+				body +="Delete from subscriptions where email='" + email +"' and artist='" + s.split(":")[1].trim() + "';\n";
 		}
 
 		out.setBody(body);

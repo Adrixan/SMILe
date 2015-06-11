@@ -22,7 +22,6 @@ public class MongoFilterProcessor implements Processor{
 			DBObject fieldFilter = BasicDBObjectBuilder.start().add("_id", 1).get();
 
 			for (int i = 0; i < locations.length; i++) {
-				System.out.println(locations[i]);
 				fieldFilter.put(locations[i].trim(), 1);
 			}
 			

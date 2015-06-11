@@ -17,11 +17,11 @@ public class EmailUnsubscribeProcessor implements Processor {
 
 		String email = headers.get("From").toString();
 
-		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email);
+		Matcher m = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(email.trim());
 		m.find();
 		email = m.group();
 
-		String body ="Delete from subscriber where email='" + email +"';\n";
+		String body ="Delete from subscriber where email='" + email.trim() +"';\n";
 
 		out.setBody(body);
 		arg0.setOut(out);

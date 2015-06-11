@@ -13,15 +13,8 @@ public class YoutubeChannelProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 		Message m = exchange.getIn();
 		//get the artist from the body
-		String artist = m.getBody().toString();
+		String artist = (String) m.getHeader("artist");
 		
-		HashMap<String, Object> headers = new HashMap<String, Object>();
-		headers.put("artist", artist);
-		headers.put("type", "youtube");
-		
-		m.setHeaders(headers);
-		
-		//System.out.println("Artist: "+artist);
 
 		//Set the body to the playlist info
 		PlaylistFinder finder = new PlaylistFinder(artist);

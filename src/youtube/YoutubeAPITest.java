@@ -84,8 +84,6 @@ public class YoutubeAPITest {
 		@Override
 		public void process(Exchange exchange) throws Exception {
 			Exception e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-			System.out.println("DLC Excpetion caught. Has Message: "+e.getMessage());
-			System.out.println("DLC Exchange Message Body: "+ exchange.getIn().getBody());
 			
 		}
 		

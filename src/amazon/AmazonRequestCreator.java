@@ -28,7 +28,7 @@ public class AmazonRequestCreator implements Processor {
 		amazonParams.put("Service", "AWSECommerceService");
 		amazonParams.put("Operation", "ItemSearch");
 		amazonParams.put("SearchIndex","Music");  // combined SearchIndex of "Classical", "DigitalMusic" and "MusicTracks"
-		amazonParams.put("Artist", m.getBody().toString());
+		amazonParams.put("Artist", m.getHeader("artist").toString());
 		amazonParams.put("Sort","publication_date");
 		// amazonParams.put("Sort","releasedate");
 		amazonParams.put("Condition","New");

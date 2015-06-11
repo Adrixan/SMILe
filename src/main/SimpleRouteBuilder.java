@@ -1,6 +1,7 @@
 package main;
 
 
+import helper.ArtistDefiner;
 import helper.DeadLetterProcessor;
 import hipchat.HipchatMessageProcessor;
 
@@ -62,7 +63,10 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		// Enable global metrics support
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
+		
+		from("direct:wiretapLogging").setBody(simple("${headers}\n\n${body}")).convertBodyTo(String.class).to("file:out?fileName=WiretapLogging_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
+		// Subscription handling
 		from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
 		.choice()
 		.when(header("Subject").isEqualTo("subscribe")).to("direct:subscribe")
@@ -75,27 +79,36 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:modify").process(new EmailModifyProcessor()).to("metrics:counter:modify.counter").to("direct:writedb");
 
 		from("direct:writedb").to("metrics:timer:RDBM-write.timer?action=start")
-		.split(new SqlSplitExpression()).wireTap("file:out").end().to("jdbc:accounts").to("metrics:counter:RDBM-write.counter").end()
+		.split(new SqlSplitExpression()).to("jdbc:accounts").to("metrics:counter:RDBM-write.counter").end()
 		.to("metrics:timer:RDBM-write.timer?action=stop");
-
-		from("timer://foo2?repeatCount=1&delay=0")
-		.to("metrics:timer:twitter-process.timer?action=start")
+		
+		//Grabbers
+		
+		// Launch all grabbers
+		from("timer://foo2?repeatCount=1&delay=0").multicast().to("direct:startGrabbers","direct:startLastFM");
+		
+		from("direct:startGrabbers")
+		.to("metrics:timer:all-grabbers.timer?action=start")
 		.setBody(simple("select distinct(artist) from subscriptions"))
 		.to("jdbc:accounts")
 		.split(body())
-		.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-		.process(new ArtistFinder())
-		.to("direct:twittergrabber")
-		.to("metrics:timer:twitter-process.timer?action=stop");
+		.process(new ArtistDefiner()).wireTap("direct:wiretapLogging").throttle(1).timePeriodMillis(1000)
+		.multicast().parallelProcessing()
+		.to("direct:twittergrabber", "direct:youtubeAPI", "direct:amazon")
+		.to("metrics:timer:all-grabbers.timer?action=stop");
 
 
 		// we can only get tweets from the last 8 days here!!!
 		from("direct:twittergrabber")
+		.setHeader("type",simple("twitter"))
+		.wireTap("direct:wiretapLogging")
+		.process(new ArtistFinder())
 		.to("twitter://search?consumerKey="+ p.getProperty("twitter.consumerkey")+"&consumerSecret="+p.getProperty("twitter.consumersecret")+"&accessToken="+p.getProperty("twitter.accesstoken")+"&accessTokenSecret="+p.getProperty("twitter.accesstokensecret"))
 		.process(new TweetProcessor())
 		.to("metrics:counter:twitter-artists-processed.counter")
+		.wireTap("direct:wiretapLogging")
 		.to("direct:mongoInsert");
-// Aufruf des Processor (list) anpassen ?! -> funktionert diese bei euch? 
+
 		// Hipchat playlist workflow
 		from("timer://foo4?repeatCount=1&delay=0")
 		.to("metrics:timer:hipchat-process.timer?action=start")
@@ -125,7 +138,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("metrics:counter:playlists-sent-hipchat.counter");
 
 		// LastFM grabber starts here 
-		from("timer://foo?repeatCount=1&delay=0")
+		from("direct:startLastFM")
 		.to("metrics:timer:lastfm-process.timer?action=start")
 		.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
 		.to("jdbc:accounts?outputType=StreamList")
@@ -137,18 +150,9 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 
 		// Youtube grabber starts here
-		from("timer://foo?repeatCount=1&delay=0")
-			.to("metrics:timer:youtube-process.timer?action=start")
-			.setBody(simple("select distinct(artist) from subscriptions"))
-			.to("jdbc:accounts?outputType=StreamList")
-			.split(body())
-			.streaming()
-			.setBody(body().regexReplaceAll("\\{artist=(.*)(\\r)?\\}", "$1"))
-			.process(new ArtistFinder())
-			.to("direct:youtubeAPI")
-			.to("metrics:timer:youtube-process.timer?action=stop");
 
 		from("direct:youtubeAPI")
+			.setHeader("type",simple("youtube"))
 			.process(new YoutubeChannelProcessor())
 			.to("metrics:counter:YouTube-Playlists-generated.counter")
 			.to("direct:mongoInsert");
@@ -171,8 +175,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		/* TODO:
 		 * Artist-Pojo Klasse verfeinern
 		 * richtig aggregieren: momentan pro Artist eine Message (Ellie Goulding wird einmal mit anderen Location geschluckt)
-		 * -> es müssen alle Artists von einem Subscriber in einer Message sein
-		 * Überlegung, wie Pojo bzw. Template aussieht (welche Teile dynamisch: beispiel Last.fm -> wenn kein Event stattfindet)
+		 * -> es mï¿½ssen alle Artists von einem Subscriber in einer Message sein
+		 * ï¿½berlegung, wie Pojo bzw. Template aussieht (welche Teile dynamisch: beispiel Last.fm -> wenn kein Event stattfindet)
 		 * Mail mit Subscriber enrichen (from, to, subject) als Header setzen
 		 * Senden via SMTP 
 		 * */
@@ -209,7 +213,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new SubscriberLocationProcessor())
 		.split(body())
 		.process(new HeaderChangerProcessor())
-			// für Testzwecke
+			// fï¿½r Testzwecke
 			//.convertBodyTo(String.class)
 			//.to("file:fm-out?fileName=getArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 		.to("direct:mongoGetFullArtist");
@@ -285,16 +289,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 // Funktioniert diese bei euch? 
 		// Amazon grabber starts here
-		from("timer://foo?repeatCount=1&delay=0")
-		.setBody(simple("select distinct(artist) from subscriptions"))
-		.to("jdbc:accounts?outputType=StreamList")
-		.split(body()).streaming()
-		.setBody(body().regexReplaceAll("\\{artist= (.*)(\\r)?\\}", "$1"))
-		.setHeader("artist").body()
-		.to("direct:amazon");
 
 		// Amazon Route
 		from("direct:amazon")
+		.setHeader("type",simple("amazon"))
+		.wireTap("direct:wiretapLogging")
 		.to("metrics:timer:amazon-process.timer?action=start")
 		.process(new AmazonRequestCreator())
 		.recipientList(header("amazonRequestURL")).ignoreInvalidEndpoints()
@@ -306,6 +305,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("amazon_price").xpath("/Item/OfferSummary/LowestNewPrice[1]/FormattedPrice/text()", String. class)
 		.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
 		.to("metrics:timer:amazon-process.timer?action=stop")
+		.wireTap("direct:wiretapLogging")
 		.process(new AmazonMongoTester())
 		.to("direct:mongoInsert");		
 		
@@ -419,7 +419,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		mongoTest2.put("Foo", "Bar");
 		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
 		mongoTest3.put("Fun", "Park");
-		mongoTest.put("St. Pölten", mongoTest2);
+		mongoTest.put("St. Pï¿½lten", mongoTest2);
 		mongoTest.put("Wien", mongoTest3);
 		mongoTest.put("New York", mongoTest2);	
 		
@@ -427,7 +427,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("schön")
+		.simple("schï¿½n")
 		.setBody().constant(mongoTest)
 		.process(new MongoInsertProcessor())
 		.process(new MongoFixArtistString())
@@ -447,9 +447,9 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("schön")    
+		.simple("schï¿½n")    
 //		.setHeader("location")
-//		.simple("St. Pölten, Wien")
+//		.simple("St. Pï¿½lten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())

@@ -81,7 +81,6 @@
 	<classpathentry kind="lib" path="lib/template/camel-velocity-2.15.2.jar"/>
 	<classpathentry kind="lib" path="lib/template/velocity-1.7-dep.jar"/>
 	<classpathentry kind="lib" path="lib/camel/camel-http-2.15.1.jar"/>
-	<classpathentry kind="lib" path="lib/camel/camel-dns-2.15.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0.jar" sourcepath="lib/youtube/google-api-services-youtube-v3-rev137-1.20.0-sources.jar">
 		<attributes>

@@ -1,5 +1,6 @@
 package twitter;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import main.Launcher;
@@ -21,12 +22,6 @@ public class ArtistFinder implements Processor {
 
 	@Override
 	public void process(Exchange arg0) throws Exception {
-		Message m = arg0.getIn();
-
-		String body = (String) m.getBody();
-
-		m.setHeader("artist", body);
-
 
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
@@ -36,16 +31,11 @@ public class ArtistFinder implements Processor {
 		.setOAuthAccessTokenSecret(p.getProperty("twitter.accesstokensecret"));
 
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-		try {
 
-			ResponseList<User> users = twitter.searchUsers(body, 0);
-			User u = users.get(0);
+		ResponseList<User> users = twitter.searchUsers(arg0.getIn().getHeader("artist").toString(), 0);
+		User u = users.get(0);
 
-			m.setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
-
-		} catch (TwitterException te) {
-			te.printStackTrace();
-		}
+		arg0.getIn().setHeader("CamelTwitterKeywords", "from:" + u.getScreenName());
 
 	}
 

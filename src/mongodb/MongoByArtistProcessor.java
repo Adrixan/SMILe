@@ -21,7 +21,6 @@ public class MongoByArtistProcessor implements Processor{
 			DBObject[] orArray = new BasicDBObject[artists.length];
 			for (int i = 0; i < artists.length; i++) {
 				DBObject DBObj = new BasicDBObject();
-				System.out.println("by artist: " + artists[i].trim());
 				DBObj.put("_id", artists[i].trim());
 				orArray[i]=DBObj;
 			}
