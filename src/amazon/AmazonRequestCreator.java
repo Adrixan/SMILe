@@ -19,8 +19,8 @@ public class AmazonRequestCreator implements Processor {
 	public void process(Exchange exchange) throws Exception {
 		Message m = exchange.getIn();
 		
-//		m.setHeader("artist", m.getBody());
 		m.setHeader("type", "amazon");
+        m.setBody(m.getHeader("artist"));
 		
 		final Map<String, String> amazonParams = new HashMap<String, String>();
 
@@ -53,7 +53,6 @@ public class AmazonRequestCreator implements Processor {
 
 		String signedParams = signHelper.sign (amazonParams);
 
-//		m.setBody("http://" + Launcher.properties.getProperty("amazon.endpoint") + "/onca/xml?" + signedParams);
         m.setHeader("amazonRequestURL", "http4://" + Launcher.properties.getProperty("amazon.endpoint") + "/onca/xml?" + signedParams);
 	}
 }
