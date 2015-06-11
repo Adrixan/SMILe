@@ -1,6 +1,7 @@
 package main;
 
 
+import helper.ArtistDefiner;
 import helper.DeadLetterProcessor;
 import hipchat.HipchatMessageProcessor;
 
@@ -81,19 +82,21 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		//Grabbers
 		
 		// Launch all grabbers
-		from("timer://foo2?repeatCount=1&delay=0")
+		from("timer://foo2?repeatCount=1&delay=0").multicast().to("direct:startGrabbers","direct:startLastFM");
+		
+		from("direct:startGrabbers")
 		.to("metrics:timer:all-grabbers.timer?action=start")
 		.setBody(simple("select distinct(artist) from subscriptions"))
 		.to("jdbc:accounts")
 		.split(body())
-		.setBody(body().regexReplaceAll("\\{artist= ?(.*)(\\r)?\\}", "$1"))
-		.process(new ArtistFinder()).multicast()
+		.process(new ArtistDefiner()).multicast()
 		.to("direct:twittergrabber", "direct:youtubeAPI", "direct:amazon")
 		.to("metrics:timer:all-grabbers.timer?action=stop");
 
 
 		// we can only get tweets from the last 8 days here!!!
 		from("direct:twittergrabber")
+		.process(new ArtistFinder())
 		.to("twitter://search?consumerKey="+ p.getProperty("twitter.consumerkey")+"&consumerSecret="+p.getProperty("twitter.consumersecret")+"&accessToken="+p.getProperty("twitter.accesstoken")+"&accessTokenSecret="+p.getProperty("twitter.accesstokensecret"))
 		.process(new TweetProcessor())
 		.to("metrics:counter:twitter-artists-processed.counter")
@@ -128,7 +131,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("metrics:counter:playlists-sent-hipchat.counter");
 
 		// LastFM grabber starts here 
-		from("timer://foo?repeatCount=1&delay=0")
+		from("direct:startLastFM")
 		.to("metrics:timer:lastfm-process.timer?action=start")
 		.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
 		.to("jdbc:accounts?outputType=StreamList")

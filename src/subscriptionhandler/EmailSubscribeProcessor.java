@@ -21,14 +21,14 @@ public class EmailSubscribeProcessor implements Processor {
 		m.find();
 		email = m.group();
 
-		String body ="Insert into subscriber (email) values ('" + email +"');\n";
+		String body ="Insert into subscriber (email) values ('" + email.trim() +"');\n";
 
 		for(String s : arg0.getIn().getBody().toString().split("\n"))
 		{
 			if(s.startsWith("Location:"))
-				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1] + "');\n";
+				body +="Insert into locations (email, location) values ('" + email +"','" + s.split(":")[1].trim() + "');\n";
 			if(s.startsWith("Artist:"))
-				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1] + "');\n";
+				body +="Insert into subscriptions (email, artist) values ('" + email +"','" + s.split(":")[1].trim() + "');\n";
 		}
 
 		out.setBody(body);
