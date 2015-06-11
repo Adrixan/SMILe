@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.org.apache.bcel.internal.generic.LSTORE;
 
+import pojo.Album;
+import pojo.AlbumPojo;
 import pojo.ArtistPojo;
 import pojo.LocationPojo;
 
@@ -22,13 +24,12 @@ public class ArtistPojoProcessor implements Processor {
 	
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		// TODO Auto-generated method stub
 		
 		Message out = exchange.getIn();
 		
 		String newBody="";
-		System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().toString());
-		System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().getClass().toString());
+			//System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().toString());
+			//System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().getClass().toString());
 		
 		HashMap<String, Object> bodyMap =  (HashMap<String, Object>) out.getBody();
 		
@@ -36,6 +37,7 @@ public class ArtistPojoProcessor implements Processor {
 		HashMap<String, Object> youtubeMap = (HashMap<String, Object>) bodyMap.get("youtube");
 		HashMap<String, Object> twitterMap = (HashMap<String, Object>) bodyMap.get("twitter");
 		HashMap<String, Object> lastFmMap = (HashMap<String, Object>) bodyMap.get("lastFM");
+		HashMap<String, Object> amazonMap = (HashMap<String, Object>) bodyMap.get("amazon");
 		
 		lastFmMap.remove("_id");
 		
@@ -44,19 +46,34 @@ public class ArtistPojoProcessor implements Processor {
 		
 		Map<String,Object> headers = exchange.getIn().getHeaders();
 		
+		/*
+		 * General Information: important for ArtistPojo 
+		 * artist name, subscriber
+		 * */
 		ArtistPojo artistPojo = new ArtistPojo((String)headers.get("artist"));
+		artistPojo.setSubscriberName((String) headers.get("subscriber"));
+	
+		/*
+		 *  Twitter Section starts here
+		 */
 		artistPojo.setTwitterSection(tweets);
 		
+		/* 
+		 * Youtube Section starts here
+		 */
 		artistPojo.setyChannel((String)youtubeMap.get("channel"));
 		artistPojo.setyChannelName((String)youtubeMap.get("title"));
 		artistPojo.setyPlaylist((String)youtubeMap.get("playlist"));
 		artistPojo.setySubscriber((String)youtubeMap.get("subscribers"));
 		
+		/*
+		 *  LastFM Section starts here
+		 */
 		ArrayList<LocationPojo> locations = new ArrayList<LocationPojo>();
 		
 		for(Entry<String,Object> e:lastFMLocations){
-			LocationPojo lp = new LocationPojo(e.getKey());
-			System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+lp.getLocationName());
+			LocationPojo lp = new LocationPojo(e.getKey()); // Key: LocationName
+			//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+lp.getLocationName());
 			
 			HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //LocationName Datum: Webseite
 			ArrayList<String> event = new ArrayList<String>();
@@ -83,7 +100,33 @@ public class ArtistPojoProcessor implements Processor {
 		
 		artistPojo.setLastFMSection(locations);
 		
-		// Todo: AmazonSection !!!
+		/*
+		 *  Amazon Section starts here
+		 */
+		amazonMap.remove("_id");
+		ArrayList<Entry<String,Object>> amazonEntries = new ArrayList<Entry<String,Object>>(amazonMap.entrySet());
+		ArrayList<AlbumPojo> albenPojo = new ArrayList<AlbumPojo>();
+		
+		for(Entry<String,Object> e:amazonEntries){
+			AlbumPojo ap = new AlbumPojo(e.getKey());		//  Key: AmazonUid 
+			// System.out.println("xxxxxxxxxAlbumPOJOxxxxxxxxxxxxxxxxxxxxxxxx"+ap.getAmazonUid());
+			
+			HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //"title = xxx"
+			ArrayList<Album> alben = new ArrayList<Album>();
+			
+				
+			Album newAlbum = new Album();
+			newAlbum.setTitle((String) hashi.get("title"));
+			newAlbum.setPrice((String) hashi.get("price"));
+			newAlbum.setImageurl((String) hashi.get("imageurl"));
+			newAlbum.setPageurl((String) hashi.get("pageurl"));
+			
+			alben.add(newAlbum);
+			ap.setAlben(alben);
+			albenPojo.add(ap);
+		}
+		artistPojo.setAmazonSection(albenPojo);
+		
 		
 		
 		out.setBody(artistPojo);

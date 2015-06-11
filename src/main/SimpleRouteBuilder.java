@@ -36,7 +36,6 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 
 import amazon.AmazonAggregationStrategy;
-import amazon.AmazonMongoTester;
 import amazon.AmazonRequestCreator;
 import subscriptionhandler.EmailModifyProcessor;
 import subscriptionhandler.EmailSubscribeProcessor;
@@ -235,8 +234,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	    .process(new ArtistPojoProcessor())
 	//    .aggregate(header("subscriber"), new NewsletterFullArtist()) //header("subscriber")
 	//	.completionInterval(5000)
-	    //.to("velocity:file:template/newsletter.vm")		// eig Template 
-	    .to("velocity:file:template/test.vm").id("velocityTemplate")
+	    .to("velocity:file:template/newsletter.vm").id("velocityTemplate")
 	    .convertBodyTo(String.class)
 	    
 	    // Content Enricher
@@ -245,7 +243,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	    /*
 	     * toDo: aggregieren oder enrichen (mit subsriber) -> alle aritst für einen subscriber in eine message!!! 
 	     * Header setzen: TO/FROM/Subject
-	     * Senden per smtp -> siehe route weiter unten
+	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
 	     * */
 	    
 		.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
@@ -306,7 +304,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
 		.to("metrics:timer:amazon-process.timer?action=stop")
 		.wireTap("direct:wiretapLogging")
-		.process(new AmazonMongoTester())
+	//	.process(new AmazonMongoTester())
 		.to("direct:mongoInsert");		
 		
 		

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class ArtistPojo {
 
 	private String artistName = "";
+	private String subscriberName="";
 
 	// twitter-section
 	private ArrayList<Object> twitterSection;
@@ -16,7 +17,8 @@ public class ArtistPojo {
 	private String ySubscriber="";
 	
 	// amazon-section
-	private String amazonSection = "";
+	private ArrayList<AlbumPojo> amazonSection = new ArrayList<AlbumPojo>();
+	
 	// last.fm-section
 	private ArrayList<LocationPojo> lastFMSection = new ArrayList<LocationPojo>();
 
@@ -34,6 +36,18 @@ public class ArtistPojo {
 
 	public void setArtistName(String artistName) {
 		this.artistName = artistName;
+	}
+
+	public String getSubscriberName() {
+		return subscriberName;
+	}
+
+	public void setSubscriberName(String subscriberName) {
+		String subscriberFromHeader [] = subscriberName.split("@");
+		
+		
+		this.subscriberName = subscriberFromHeader[0];
+		
 	}
 
 	public ArrayList<Object> getTwitterSection() {
@@ -85,8 +99,15 @@ public class ArtistPojo {
 	}
 
 	public void setLastFMSection(ArrayList<LocationPojo> lastFMSection) {	
-		System.out.println("++++++++++++++++++++++++++++++++++++++Last FM wird gesetzt"+lastFMSection.size());
 		this.lastFMSection = lastFMSection;
+	}
+	
+	public ArrayList<AlbumPojo> getAmazonSection() {
+		return amazonSection;
+	}
+
+	public void setAmazonSection(ArrayList<AlbumPojo> amazonSection) {
+		this.amazonSection = amazonSection;
 	}
 
 }
