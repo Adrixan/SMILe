@@ -20,6 +20,7 @@ import lastFM.EventFinder;
 import lastFM.LastFMProcessor;
 import lastFM.LastFMSplitExpression;
 import metrics.MetricsProcessor;
+import newsletter.ArtistPojoProcessor;
 import newsletter.EnrichWithSubscribers;
 import newsletter.GrabberAggregationStrategy;
 import newsletter.HeaderChangerProcessor;
@@ -223,14 +224,28 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		from("direct:aggregateAll")
 				//	.split(body())
-		.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
-		.completionInterval(5000)
+	//	.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
+	//	.completionInterval(5000)
 	    .log("********************** Aggregator ALL  **************************")
 	    .log("------------------Sending Newsletter to File")
+	    .process(new ArtistPojoProcessor())
+	//    .aggregate(header("subscriber"), new NewsletterFullArtist()) //header("subscriber")
+	//	.completionInterval(5000)
 	    //.to("velocity:file:template/newsletter.vm")		// eig Template 
 	    .to("velocity:file:template/test.vm").id("velocityTemplate")
 	    .convertBodyTo(String.class)
+	    
+	    // Content Enricher
+//	    .pollEnrich(resourceUri)
+	    
+	    /*
+	     * toDo: aggregieren oder enrichen (mit subsriber) -> alle aritst für einen subscriber in eine message!!! 
+	     * Header setzen: TO/FROM/Subject
+	     * Senden per smtp -> siehe route weiter unten
+	     * */
+	    
 		.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		//.to("file:fm-out?fileName=getFullArtistMessage.txt");
 		
 //		.pollEnrich("direct:mongoGetArtist", new GrabberAggregationStrategy())
 		//.setHeader("Newsletter",simple("newsletter-generation"))

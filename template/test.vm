@@ -4,10 +4,62 @@ Hello ${headers.subscriber}
 Thanks for using and searching with SMILe.
 
 
-The following news for the artist '${headers.artist}' are provided: 
+The following news for the artist '${body.artistName}' are provided: 
 
 
- ${body} 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++                         Twitter                             +++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Recent Tweets for artist '${body.artistName}': 
+ #foreach ($tweet in $body.twitterSection)
+ ${tweet}
+ #end
+ 
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++                          YouTube                            +++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Your Youtube-Playlist for artist '${body.artistName}':
+ ${body.yPlaylist}
+ 
+ 
+ Channel: ${body.yChannel}
+ Channel name: ${body.yChannelName}
+ Subscribers: ${body.ySubscriber}
+ 
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        Last.FM 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The following events are upcoming for the following locations:
+
+#foreach ($location in $body.lastFMSection)
+ ${location.locationName}
+ #foreach ($event in $location.events)
+   * ${event}
+ #end
+ 
+#end
+
+ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ 				        Amazon	 							+++ 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The following albums are on sale:
+ ${body.amazonSection}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ 
+  
  This is an auto generated email. You cannot reply.
  
 

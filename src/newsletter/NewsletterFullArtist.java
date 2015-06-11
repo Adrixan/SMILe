@@ -1,5 +1,6 @@
 package newsletter;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import main.Launcher;
@@ -17,28 +18,45 @@ public class NewsletterFullArtist implements AggregationStrategy {
 
     public Exchange aggregate(Exchange OldExchange, Exchange NewExchange) {
         
-        String sFirstTitel="";
-        String sSecTitel="";
-        String firstMessage="";
-        String secMessage="";
-        String sNewsletter="";
+		String sFirstTitel = "";
+		String sSecTitel = "";
+		String firstMessage = "";
+		String secMessage = "";
+		String sNewsletter = "";
 
-        if(OldExchange!=null)
-        {
-            firstMessage=OldExchange.getIn().getBody(String.class);
-            Log.info("firstMessage :"+firstMessage.toString());
-        }
-        secMessage=NewExchange.getIn().getBody(String.class);
-        Log.info("secondMessage :"+secMessage.toString());
+		if (OldExchange != null) {
+			firstMessage = OldExchange.getIn().getBody(String.class);
+			Log.info("firstMessage :" + firstMessage.toString());
+		}
+		secMessage = NewExchange.getIn().getBody(String.class);
+		Log.info("secondMessage :" + secMessage.toString());
 
-        sNewsletter=firstMessage + '\n' + secMessage;
-        Log.info("BAM BAM : Newsletter"+sNewsletter.toString());
+		sNewsletter = firstMessage + '\n' + secMessage;
+		Log.info("BAM BAM : Newsletter" + sNewsletter.toString());
 
-        NewExchange.getIn().setBody(sNewsletter);
-        NewExchange.getIn().setHeader("artist",NewExchange.getIn().getHeader("artist"));
-        
-        Log.info("NewExhchange Header: "+NewExchange.getIn().getHeader("artist"));
+		NewExchange.getIn().setBody(sNewsletter);
+		NewExchange.getIn().setHeader("artist",
+				NewExchange.getIn().getHeader("artist"));
 
-        return NewExchange;
+		Log.info("NewExhchange Header: "
+				+ NewExchange.getIn().getHeader("artist"));
+
+		return NewExchange;
+    	
+//		final HashMap<String, HashMap> fullArtist;
+//		HashMap grabberItem = new HashMap();
+//
+//		if (oldExchange == null) {
+//			fullArtist = new HashMap<String, HashMap>();
+//		} else {
+//			fullArtist = (HashMap<String, HashMap>) oldExchange.getIn()
+//					.getBody();
+//		}
+//
+//		grabberItem = (HashMap) newExchange.getIn().getBody();
+//
+//		fullArtist.put(grabberItem.get("_id").toString(), grabberItem);
+//		newExchange.getIn().setBody(fullArtist);
+//		return newExchange;
     }
 }
