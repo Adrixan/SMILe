@@ -1,10 +1,12 @@
-Hello ${body.subscriberName}!
+Hello ${in.getHeader('subscriber')}!
 
  
 Thanks for using and searching with SMILe.
 
+#foreach ($artist in $body)
 
-The following news for the artist '${body.artistName}' are provided: 
+
+The following news for the artist '${artist.artistName}' are provided: 
 
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -12,8 +14,8 @@ The following news for the artist '${body.artistName}' are provided:
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-Recent Tweets for artist '${body.artistName}': 
- #foreach ($tweet in $body.twitterSection)
+Recent Tweets for artist '${artist.artistName}': 
+ #foreach ($tweet in $artist.twitterSection)
  ${tweet}
  #end
  
@@ -25,13 +27,13 @@ Recent Tweets for artist '${body.artistName}':
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-Your Youtube-Playlist for artist '${body.artistName}':
- ${body.yPlaylist}
+Your Youtube-Playlist for artist '${artist.artistName}':
+ ${artist.yPlaylist}
  
  
- Channel: ${body.yChannel}
- Channel name: ${body.yChannelName}
- Subscribers: ${body.ySubscriber}
+ Channel: ${artist.yChannel}
+ Channel name: ${artist.yChannelName}
+ Subscribers: ${artist.ySubscriber}
  
  
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -43,7 +45,7 @@ Your Youtube-Playlist for artist '${body.artistName}':
 
 The following events are upcoming for the following locations:
 
-#foreach ($location in $body.lastFMSection)
+#foreach ($location in $artist.lastFMSection)
  ${location.locationName}
  #foreach ($event in $location.events)
    * ${event}
@@ -61,7 +63,7 @@ The following events are upcoming for the following locations:
 
 The following albums are on sale:
 
-#foreach ($albenPojo in $body.amazonSection)
+#foreach ($albenPojo in $artist.amazonSection)
 Amazon-UID: ${albenPojo.amazonUid}
 #foreach ($album in $albenPojo.alben)
    * Title: ${album.title}
@@ -75,7 +77,7 @@ Amazon-UID: ${albenPojo.amazonUid}
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
- 
+#end
   
  This is an auto generated email. You cannot reply.
  

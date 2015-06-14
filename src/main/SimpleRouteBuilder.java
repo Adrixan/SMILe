@@ -25,6 +25,7 @@ import newsletter.ArtistPojoProcessor;
 import newsletter.EnrichWithSubscribers;
 import newsletter.GrabberAggregationStrategy;
 import newsletter.HeaderChangerProcessor;
+import newsletter.NewsletterAggregationStrategy;
 import newsletter.NewsletterFullArtist;
 import newsletter.SubscriberLocationProcessor;
 
@@ -234,6 +235,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	    .process(new ArtistPojoProcessor())
 	//    .aggregate(header("subscriber"), new NewsletterFullArtist()) //header("subscriber")
 	//	.completionInterval(5000)
+	    .aggregate(header("subscriber"), new NewsletterAggregationStrategy())
+	    .completionInterval(5000)
 	    .to("velocity:file:template/newsletter.vm").id("velocityTemplate")
 	    .convertBodyTo(String.class)
 	    

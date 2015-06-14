@@ -19,8 +19,11 @@ public class MongoAggregationStrategy implements AggregationStrategy {
        }	   
        
        grabberItem = (HashMap) newExchange.getIn().getBody();
-       
-       fullArtist.put(grabberItem.get("_id").toString(), grabberItem);
+       //System.out.println("##############################grabberItem: "+grabberItem);
+       Object id = grabberItem.get("_id");
+       if (id != null){
+    	   fullArtist.put(id.toString(), grabberItem);
+       }
 	   newExchange.getIn().setBody(fullArtist);
 	   return newExchange;
    }

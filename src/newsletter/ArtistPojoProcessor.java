@@ -39,10 +39,10 @@ public class ArtistPojoProcessor implements Processor {
 		HashMap<String, Object> lastFmMap = (HashMap<String, Object>) bodyMap.get("lastFM");
 		HashMap<String, Object> amazonMap = (HashMap<String, Object>) bodyMap.get("amazon");
 		
-		lastFmMap.remove("_id");
+		if (lastFmMap != null) {
+			lastFmMap.remove("_id");
+		}
 		
-		ArrayList<Object> tweets = new ArrayList<Object>(twitterMap.values());
-		ArrayList<Entry<String,Object>> lastFMLocations = new ArrayList<Entry<String,Object>>(lastFmMap.entrySet());
 		
 		Map<String,Object> headers = exchange.getIn().getHeaders();
 		
@@ -56,7 +56,15 @@ public class ArtistPojoProcessor implements Processor {
 		/*
 		 *  Twitter Section starts here
 		 */
-		artistPojo.setTwitterSection(tweets);
+		if (twitterMap != null) {
+			ArrayList<Object> tweets = new ArrayList<Object>(twitterMap.values());
+			artistPojo.setTwitterSection(tweets);
+		}
+		else {
+			ArrayList<Object> tweets = new ArrayList<Object>();
+			tweets.add("No tweets available!");
+			artistPojo.setTwitterSection(tweets);
+		}
 		
 		/* 
 		 * Youtube Section starts here
@@ -69,36 +77,50 @@ public class ArtistPojoProcessor implements Processor {
 		/*
 		 *  LastFM Section starts here
 		 */
-		ArrayList<LocationPojo> locations = new ArrayList<LocationPojo>();
-		
-		for(Entry<String,Object> e:lastFMLocations){
-			LocationPojo lp = new LocationPojo(e.getKey()); // Key: LocationName
-			//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+lp.getLocationName());
+		if (lastFmMap != null) {
+			ArrayList<LocationPojo> locations = new ArrayList<LocationPojo>();
+			ArrayList<Entry<String,Object>> lastFMLocations = new ArrayList<Entry<String,Object>>(lastFmMap.entrySet());
 			
-			HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //LocationName Datum: Webseite
-			ArrayList<String> event = new ArrayList<String>();
-			
-			for(Entry<String,Object> eventEntry:hashi.entrySet()){
-				String eventName = eventEntry.getKey();
+			for(Entry<String,Object> e:lastFMLocations){
+				LocationPojo lp = new LocationPojo(e.getKey()); // Key: LocationName
+				//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+lp.getLocationName());
 				
-				String eventWeb = (String) eventEntry.getValue();
+				HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //LocationName Datum: Webseite
+				ArrayList<String> event = new ArrayList<String>();
 				
-				event.add(eventName + " - " + eventWeb);
+				for(Entry<String,Object> eventEntry:hashi.entrySet()){
+					String eventName = eventEntry.getKey();
+					
+					String eventWeb = (String) eventEntry.getValue();
+					
+					event.add(eventName + " - " + eventWeb);
+				}
+				/*	if(event.isEmpty()){
+					event.add("No events are upcoming!");
+				}*/
+				lp.setEvents(event);
+				locations.add(lp);
 			}
-			/*	if(event.isEmpty()){
-				event.add("No events are upcoming!");
-			}*/
-			lp.setEvents(event);
-			locations.add(lp);
+			
+			if(locations.isEmpty()){
+				LocationPojo lp = new LocationPojo();
+				lp.setLocationsEmpty();
+				locations.add(lp);
+			}
+			
+			artistPojo.setLastFMSection(locations);
+		}
+		else
+		{
+			ArrayList<LocationPojo> locations = new ArrayList<LocationPojo>();
+			if(locations.isEmpty()){
+				LocationPojo lp = new LocationPojo();
+				lp.setLocationsEmpty();
+				locations.add(lp);
+			}
+			artistPojo.setLastFMSection(locations);
 		}
 		
-		if(locations.isEmpty()){
-			LocationPojo lp = new LocationPojo();
-			lp.setLocationsEmpty();
-			locations.add(lp);
-		}
-		
-		artistPojo.setLastFMSection(locations);
 		
 		/*
 		 *  Amazon Section starts here
