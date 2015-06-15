@@ -16,6 +16,9 @@ import mongodb.MongoInsertProcessor;
 import mongodb.MongoResultProcessor;
 import mongodb.uniqueHashHeaderProcessor;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
 import lastFM.EventFinder;
@@ -28,6 +31,7 @@ import newsletter.SubscriberLocationProcessor;
 
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
 import org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository;
+
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 
@@ -258,7 +262,13 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
 	     * */
 	    .setHeader("Subject", constant("SMILe Newsletter"))
-	    .setHeader("To", header("subscriber"))
+	    .process(new Processor() {
+			@Override
+			public void process(Exchange exchange) throws Exception {
+				exchange.getIn().setHeader("To", exchange.getIn().getHeader("subscriber"));
+				System.out.println(exchange.getIn().getHeader("To"));
+			}
+	    })
 		.to("smtps://"+p.getProperty("email.testhost")+"?username="+p.getProperty("email.testuser")
 				+"&password="+p.getProperty("email.testpassword"));//+"&to="+p.getProperty("email.testreceiver"));
 		//.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
