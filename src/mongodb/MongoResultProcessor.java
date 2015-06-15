@@ -32,6 +32,7 @@ public class MongoResultProcessor implements Processor{
 		String artist;		
 		artist = (String) out.getHeader("artist");
 		artist = artist.replaceAll("_", " ");  		
+
 		out.setHeader("artist", artist);
 		out.setBody(body);
 		arg0.setOut(out);

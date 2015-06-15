@@ -14,25 +14,20 @@ import mongodb.MongoFilterProcessor;
 import mongodb.MongoFixArtistString;
 import mongodb.MongoInsertProcessor;
 import mongodb.MongoResultProcessor;
+import mongodb.uniqueHashHeaderProcessor;
 
 import org.apache.camel.builder.RouteBuilder;
 
 import lastFM.EventFinder;
-import lastFM.LastFMProcessor;
-import lastFM.LastFMSplitExpression;
 import metrics.MetricsProcessor;
 import newsletter.ArtistPojoProcessor;
 import newsletter.EnrichWithSubscribers;
-import newsletter.GrabberAggregationStrategy;
 import newsletter.HeaderChangerProcessor;
 import newsletter.NewsletterAggregationStrategy;
-import newsletter.NewsletterFullArtist;
 import newsletter.SubscriberLocationProcessor;
 
 import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
-import org.apache.camel.component.mongodb.MongoDbConstants;
-
-import com.mongodb.BasicDBObject;
+import org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 
@@ -45,6 +40,8 @@ import subscriptionhandler.SqlSplitExpression;
 import twitter.ArtistFinder;
 import twitter.TweetProcessor;
 import youtube.YoutubeChannelProcessor;
+
+import org.apache.commons.dbcp2.BasicDataSource;
 
 public class SimpleRouteBuilder extends RouteBuilder {
 
@@ -63,6 +60,16 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		// Enable global metrics support
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
+		
+		//TODO: Find a way to get datasource from Launch
+		BasicDataSource ds = new BasicDataSource();
+		ds.setDriverClassName("com.mysql.jdbc.Driver");
+		ds.setUrl("jdbc:mysql://" + p.getProperty("rdbm.host") + "/" + p.getProperty("rdbm.database") +"?"
+				+ "user=" + p.getProperty("rdbm.user") +"&password=" + p.getProperty("rdbm.password"));
+		
+		JdbcMessageIdRepository repo = new JdbcMessageIdRepository(ds, "mongodb");
+		
+		
 		
 		from("direct:wiretapLogging").setBody(simple("${headers}\n\n${body}")).convertBodyTo(String.class).to("file:out?fileName=WiretapLogging_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
@@ -190,7 +197,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 //		log("-------------------FINISHED--------------------------------------");
 
 		
-		/// test
+		// test
 		from("timer://newsletter?repeatCount=1&delay=0")
 		.log("--------------------timer fired..--------------------------------")
 	// setHeader caller: hipchat? @Peter fragen
@@ -227,9 +234,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 //		.to("direct:mongoGetFullArtist");
 		
 		from("direct:aggregateAll")
-				//	.split(body())
-	//	.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
-	//	.completionInterval(5000)
+
+	//	.split(body())
+//		.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
+//		.completionInterval(5000)
+
 	    .log("********************** Aggregator ALL  **************************")
 	    .log("------------------Sending Newsletter to File")
 	    .process(new ArtistPojoProcessor())
@@ -329,6 +338,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
 		.process(new MongoResultProcessor())
+		.process(new uniqueHashHeaderProcessor())
+		.idempotentConsumer(header("hash"), repo)
 		.to("metrics:counter:mongo-getArtist.counter")
 		.to("direct:chooseCall")
 		.to("metrics:timer:mongo-getArtist.timer?action=stop");
@@ -347,7 +358,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 				//.convertBodyTo(String.class)
 				//.to("file:fm-out?fileName=getArtistMessageFullZeug_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=start")
-		.multicast().to("direct:mongoGetTwitterYTAmazon", "direct:mongoGetLastFM");
+		.multicast().parallelProcessing().to("direct:mongoGetTwitterYTAmazon", "direct:mongoGetLastFM");
 		
 		String in[] = new String[] {"twitter", "youtube", "amazon"};
 		DBObject querryHelper = BasicDBObjectBuilder.start().add("$in", in).get();
@@ -362,6 +373,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findAll"))
 		.split().body()
 		.process(new MongoResultProcessor())
+		.process(new uniqueHashHeaderProcessor())
+		.idempotentConsumer(header("hash"), repo)
 		.to("direct:endMongoGetFullArtist");
 
 		
@@ -375,6 +388,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoFilterProcessor())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
 		.process(new MongoResultProcessor())
+		.process(new uniqueHashHeaderProcessor())
+		.idempotentConsumer(header("hash"), repo)		
 		.to("direct:endMongoGetFullArtist");
 		
 		
@@ -390,28 +405,13 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	//	.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end()
 		.choice().when(header("caller").isEqualTo("newsletter")).to("direct:aggregateAll").end();
 
-		// First try to get multiple artists not sure if we need it
-		//       from("direct:mongoGetFullArtists")
-		//       .setHeader("artists")
-		//       .simple("metallica, slayer")
-		//       .to("log:mongo:splitter1?level=INFO")
-		//       .split().method("splitterBean", "splitHeader")
-		//       .to("direct:mongoGetFullArtist")
-		//       .to("log:mongo:splitter2?level=INFO")
-		//       .aggregate().body()
-		//       .to("log:mongo:aggregator?level=INFO");
-
-
-
-
-
-
+		
 		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
 
-//		     from("timer://runOnce?repeatCount=1&delay=5000")
+		     from("timer://runOnce?repeatCount=2&delay=5000")
 //		     .to("direct:testFindAll");
 //		     .to("direct:testInsert");
-//		     .to("direct:testFindById");
+		     .to("direct:testFindById");
 		//     .to("direct:testRemove");
 		//     .to("direct:mongoGetArtists");
 		     
@@ -420,7 +420,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		mongoTest2.put("Foo", "Bar");
 		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
 		mongoTest3.put("Fun", "Park");
-		mongoTest.put("St. Pï¿½lten", mongoTest2);
+		mongoTest.put("St. Pölten", mongoTest2);
 		mongoTest.put("Wien", mongoTest3);
 		mongoTest.put("New York", mongoTest2);	
 		
@@ -428,7 +428,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("artist")
 		.simple("blind guardian")
 		.setHeader("type")
-		.simple("schï¿½n")
+		.simple("test")
 		.setBody().constant(mongoTest)
 		.process(new MongoInsertProcessor())
 		.process(new MongoFixArtistString())
@@ -442,15 +442,17 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoByArtistProcessor())
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=remove"));
-
-
+		
+		JdbcMessageIdRepository testRepo = new JdbcMessageIdRepository(ds, "test");
+		
+		
+		
 		from("direct:testFindById")
-		.setHeader("artist")
-		.simple("blind guardian")
-		.setHeader("type")
-		.simple("schï¿½n")    
+		.setHeader("artist").simple("blind guardian")
+		.setHeader("type").simple("test")
+		.setHeader("subscriber").simple("testsub")
 //		.setHeader("location")
-//		.simple("St. Pï¿½lten, Wien")
+//		.simple("St. Pölten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())
@@ -458,7 +460,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findById"))
 		.to("log:mongo:findById1?level=INFO")
 		.process(new MongoResultProcessor())
-		.to("log:mongo:findById2?level=INFO");
+		.process(new uniqueHashHeaderProcessor())
+		.to("log:mongo:findById2?level=INFO")
+		.idempotentConsumer(header("hash"), testRepo)
+		.to("direct:wiretapLogging")
+		.to("log:mongo:findById3?level=INFO");
 
 		String hin[] = new String[] {"test", "test3"};
 		DBObject helper = BasicDBObjectBuilder.start().add("$in", hin).get();
