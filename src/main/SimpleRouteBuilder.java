@@ -248,9 +248,17 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	     * Header setzen: TO/FROM/Subject
 	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
 	     * */
-	    
-		.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-		//.to("file:fm-out?fileName=getFullArtistMessage.txt");
+	    .setHeader("Subject", constant("SMILe Newsletter"))
+	    //.setHeader("From", constant("smileapp44@gmail.com"))
+	    //.setHeader("To", constant("tobias.fink42@gmail.com"))
+	    //.to("smtp://" + p.getProperty("email.user") + "?password=" + p.getProperty("email.password"));
+	    //.to("smtp://smileapp44@gmail.com?password=elims_2015");
+		//.setHeader("subject", constant("new incident reported"))
+	    .setHeader("To", constant(p.getProperty("email.testreceiver")))
+		//.log("Sending email to "+p.getProperty("email.testreceiver")+":\n${body}")
+		.to("smtps://"+p.getProperty("email.testhost")+"?username="+p.getProperty("email.testuser")
+				+"&password="+p.getProperty("email.testpassword"));//+"&to="+p.getProperty("email.testreceiver"));
+		//.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
 //		.pollEnrich("direct:mongoGetArtist", new GrabberAggregationStrategy())
 		//.setHeader("Newsletter",simple("newsletter-generation"))
