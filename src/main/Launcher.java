@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 
-import mongodb.HeaderSplitterBean;
-
 import org.apache.camel.Main;
 import org.apache.commons.dbcp2.BasicDataSource;
 
@@ -34,8 +32,6 @@ public class Launcher {
 
 		Mongo mongoBean = new Mongo("localhost", 27017);
 		main.bind("mongoBean", mongoBean);
-
-		main.bind("splitterBean", new HeaderSplitterBean());
 
 		// Registry necessary so metrics are properly kept in memory
 		MetricRegistry metricRegistry = new com.codahale.metrics.MetricRegistry();

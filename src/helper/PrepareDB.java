@@ -30,9 +30,13 @@ public class PrepareDB {
 			statement.executeUpdate("drop table if exists subscriptions");
 			statement.executeUpdate("drop table if exists locations");
 			statement.executeUpdate("drop table if exists subscriber");
+			
+			statement.executeUpdate("drop table if exists CAMEL_MESSAGEPROCESSED");
 			statement.executeUpdate("create table subscriber (email varchar(100) PRIMARY KEY)");
 			statement.executeUpdate("create table subscriptions (email varchar(100), artist varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
 			statement.executeUpdate("create table locations (email varchar(100), location varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
+			
+			statement.executeUpdate("CREATE TABLE CAMEL_MESSAGEPROCESSED (processorName VARCHAR(255) UNIQUE, messageId VARCHAR(100) PRIMARY KEY, createdAt TIMESTAMP)");
 		}
 		catch(SQLException e)
 		{
