@@ -258,7 +258,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
 	     * */
 	    .setHeader("Subject", constant("SMILe Newsletter"))
-	    .setHeader("To", constant(p.getProperty("email.testreceiver")))
+	    .setHeader("To", header("subscriber"))
 		.to("smtps://"+p.getProperty("email.testhost")+"?username="+p.getProperty("email.testuser")
 				+"&password="+p.getProperty("email.testpassword"));//+"&to="+p.getProperty("email.testreceiver"));
 		//.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
