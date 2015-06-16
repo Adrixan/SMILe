@@ -78,6 +78,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:wiretapLogging").setBody(simple("${headers}\n\n${body}")).convertBodyTo(String.class).to("file:out?fileName=WiretapLogging_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
 		// Subscription handling
+		// Polling Consumer
 		from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
 		.choice()
 		.when(header("Subject").isEqualTo("subscribe")).to("direct:subscribe")
@@ -85,6 +86,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.when(header("Subject").isEqualTo("modify")).to("direct:modify")
 		.end();
 
+		// Content-based Router
 		from("direct:subscribe").process(new EmailSubscribeProcessor()).to("metrics:counter:subscribe.counter").to("direct:writedb");
 		from("direct:unsubscribe").process(new EmailUnsubscribeProcessor()).to("metrics:counter:unsubscribe.counter").to("direct:writedb");
 		from("direct:modify").process(new EmailModifyProcessor()).to("metrics:counter:modify.counter").to("direct:writedb");
@@ -167,13 +169,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			.process(new YoutubeChannelProcessor())
 			.to("metrics:counter:YouTube-Playlists-generated.counter")
 			.to("direct:mongoInsert");
-			//.to("file:out?fileName=youtube_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-		
-		//from("timer://foo1?repeatCount=30&delay=5000")
 
 		from("jetty:http://localhost:12345/stats").process(new MetricsProcessor());
-
-		//.to("file:out?fileName=metrics_${date:now:yyyyMMdd_HHmmssSSS}.json");
 
 		/**
 		 **--------------------
@@ -257,7 +254,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 //	    .pollEnrich(resourceUri)
 	    
 	    /*
-	     * toDo: aggregieren oder enrichen (mit subsriber) -> alle aritst für einen subscriber in eine message!!! 
+	     * toDo: aggregieren oder enrichen (mit subsriber) -> alle aritst fï¿½r einen subscriber in eine message!!! 
 	     * Header setzen: TO/FROM/Subject
 	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
 	     * */
@@ -425,7 +422,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		mongoTest2.put("Foo", "Bar");
 		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
 		mongoTest3.put("Fun", "Park");
-		mongoTest.put("St. Pölten", mongoTest2);
+		mongoTest.put("St. Pï¿½lten", mongoTest2);
 		mongoTest.put("Wien", mongoTest3);
 		mongoTest.put("New York", mongoTest2);	
 		
@@ -457,7 +454,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.setHeader("type").simple("test")
 		.setHeader("subscriber").simple("testsub")
 //		.setHeader("location")
-//		.simple("St. Pölten, Wien")
+//		.simple("St. Pï¿½lten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())
@@ -489,9 +486,4 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("log:mongo:findAll3?level=INFO");    	
 
 	}
-
-	private void to(String string) {
-		// TODO Auto-generated method stub
-		
-	}  
 }

@@ -18,8 +18,6 @@ public class HipchatMessageProcessor implements Processor {
 
 		Map<String,Object> headers = arg0.getIn().getHeaders();
 
-		logger.info("#######################################Playlist: "+playlist + " for: " + (String) headers.get("subscriber"));
-
 		String out = "YouTube playlist for subscriber: " + (String) headers.get("subscriber") + " and Artist: " + (String) headers.get("artist") + " " + playlist;
 
 		arg0.getIn().setBody(out);
