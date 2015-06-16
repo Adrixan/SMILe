@@ -12,7 +12,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 
-public class uniqueHashHeaderProcessor implements Processor {
+public class UniqueHashHeaderProcessor implements Processor {
 
 	@Override
 	public void process(Exchange arg0) throws Exception {
@@ -21,8 +21,7 @@ public class uniqueHashHeaderProcessor implements Processor {
 		
 		String body = out.getBody().toString();
 		String subscriber = out.getHeader("subscriber").toString();
-		String type = out.getHeader("type").toString();
-		int hash = (body + subscriber + type).hashCode();
+		int hash = (body + subscriber).hashCode();
 
 		out.setHeader("hash", hash);
 

@@ -14,7 +14,7 @@ import mongodb.MongoFilterProcessor;
 import mongodb.MongoFixArtistString;
 import mongodb.MongoInsertProcessor;
 import mongodb.MongoResultProcessor;
-import mongodb.uniqueHashHeaderProcessor;
+import mongodb.UniqueHashHeaderProcessor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -350,7 +350,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoFixArtistString())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
 		.process(new MongoResultProcessor())
-		.process(new uniqueHashHeaderProcessor())
+		.process(new UniqueHashHeaderProcessor())
 		.idempotentConsumer(header("hash"), repo)
 		.to("metrics:counter:mongo-getArtist.counter")
 		.to("direct:chooseCall")
@@ -385,7 +385,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findAll"))
 		.split().body()
 		.process(new MongoResultProcessor())
-		.process(new uniqueHashHeaderProcessor())
+		.process(new UniqueHashHeaderProcessor())
 		.idempotentConsumer(header("hash"), repo)
 		.to("direct:endMongoGetFullArtist");
 
@@ -400,7 +400,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoFilterProcessor())
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findById"))
 		.process(new MongoResultProcessor())
-		.process(new uniqueHashHeaderProcessor())
+		.process(new UniqueHashHeaderProcessor())
 		.idempotentConsumer(header("hash"), repo)		
 		.to("direct:endMongoGetFullArtist");
 		
@@ -472,7 +472,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findById"))
 		.to("log:mongo:findById1?level=INFO")
 		.process(new MongoResultProcessor())
-		.process(new uniqueHashHeaderProcessor())
+		.process(new UniqueHashHeaderProcessor())
 		.to("log:mongo:findById2?level=INFO")
 		.idempotentConsumer(header("hash"), testRepo)
 		.to("direct:wiretapLogging")
