@@ -30,7 +30,6 @@ public class AmazonRequestCreator implements Processor {
 		amazonParams.put("SearchIndex","Music");  // combined SearchIndex of "Classical", "DigitalMusic" and "MusicTracks"
 		amazonParams.put("Artist", m.getHeader("artist").toString());
 		amazonParams.put("Sort","publication_date");
-		// amazonParams.put("Sort","releasedate");
 		amazonParams.put("Condition","New");
 		amazonParams.put("ResponseGroup", "Large");
 		
@@ -39,15 +38,12 @@ public class AmazonRequestCreator implements Processor {
 		try {
 			signHelper = new SignedRequestsHelper();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		  }
 		  catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 		  }
 		  catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
   		  }
 

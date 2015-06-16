@@ -1,37 +1,25 @@
 package amazon;
 import java.io.UnsupportedEncodingException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-// import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-// import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.Properties; 
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-
 import main.Launcher;
-
-// import org.apache.commons.codec.binary.Base64;
 import java.util.Base64;
 
 // Preparing the REST Request for the Amazon Product Advertising API
 // This is basically the sample code from http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AuthJavaSampleSig2.html
 // with four changes:
-// 1) use Java 8 java.util.Base64 native class instead of another dependency
+// 1) use java.util.Base64 native class instead of another dependency
 // 2) use java.util.Properties to configure the endpoint and "hide" my Amazon AWS keys
 // 3) return only the signed uri parameters
 // 4) solved the signature problem (again)
@@ -41,8 +29,6 @@ public class SignedRequestsHelper {
 	private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
 	private static final String REQUEST_URI = "/onca/xml";
 	private static final String REQUEST_METHOD = "GET";
-
-	private static final Properties props = new Properties();
 
 	private String endpoint;
 	private String awsAccessKeyId;
@@ -55,21 +41,6 @@ public class SignedRequestsHelper {
 	{
 		byte[] secretyKeyBytes;
 
-		// SWOBI: get the endpoint and keys from the properties file
-/*
- 		try {
- 
-			props.load(new FileInputStream("smile.properties"));
-		} catch (FileNotFoundException e) {
-			System.out.println("FATAL: File smile.properties not found.");
-			System.exit(1);
-			// e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("FATAL: File smile.properties could not be read.");
-			System.exit(1);
-			// e.printStackTrace();
-		}
-*/
 		endpoint = Launcher.properties.getProperty("amazon.endpoint");
 		awsAccessKeyId = Launcher.properties.getProperty("amazon.awsAccessKeyId");
 		awsSecretKey = Launcher.properties.getProperty("amazon.awsSecretKey"); 
@@ -94,18 +65,14 @@ public class SignedRequestsHelper {
 						+ canonicalQS;
 
 		// Build signedParams for Camel HTTP4 component
-		// SWOBI: Since there is a double urlencoding/decoding problem in this component I had to use percent encoding twice
+		// SWOBI: Since there is a double urlencoding/decoding problem in this component I had to use RAW for the signature.
 		// Otherwise a '+' in the base64 encoded signature would break the request (HTTP Error 403 - SignatureDoesNotMatch)
 		// see http://camel.apache.org/how-do-i-configure-endpoints.html
 		// see http://blog.getsandbox.com/2014/05/31/escaping-camel-endpoint-encoding/
 
 		String hmac = hmac(toSign);
-		String sig = percentEncodeRfc3986(percentEncodeRfc3986(hmac)); 
-//		String sig = percentEncodeRfc3986(hmac); 
-
-		    String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
-
-//      String signedParams = canonicalQS + "&Signature=" + sig;
+		
+		String signedParams = canonicalQS + "&Signature=RAW(" + hmac + ")";
 
 		return signedParams;  
 	}
@@ -117,10 +84,7 @@ public class SignedRequestsHelper {
 		byte[] rawHmac;
 		try {
 			data = stringToSign.getBytes(UTF8_CHARSET);
-			rawHmac = mac.doFinal(data);
-			//      Base64 encoder = new Base64();
-			//      signature = new String(encoder.encode(rawHmac));
-			// SWOBI: Java 8 at last has a base64 class, so I got rid of one dependency       
+			rawHmac = mac.doFinal(data);    
 			signature = Base64.getEncoder().encodeToString(rawHmac); 
 
 		} catch (UnsupportedEncodingException e) {
