@@ -69,10 +69,18 @@ public class ArtistPojoProcessor implements Processor {
 		/* 
 		 * Youtube Section starts here
 		 */
-		artistPojo.setyChannel((String)youtubeMap.get("channel"));
-		artistPojo.setyChannelName((String)youtubeMap.get("title"));
-		artistPojo.setyPlaylist((String)youtubeMap.get("playlist"));
-		artistPojo.setySubscriber((String)youtubeMap.get("subscribers"));
+		if (youtubeMap != null) {
+			artistPojo.setyChannel((String)youtubeMap.get("channel"));
+			artistPojo.setyChannelName((String)youtubeMap.get("title"));
+			artistPojo.setyPlaylist((String)youtubeMap.get("playlist"));
+			artistPojo.setySubscriber((String)youtubeMap.get("subscribers"));
+		} else {
+			artistPojo.setyPlaylist("No playlist available");
+			artistPojo.setyChannel("");
+			artistPojo.setyChannelName("");
+			artistPojo.setySubscriber("");
+		}
+		
 		
 		/*
 		 *  LastFM Section starts here

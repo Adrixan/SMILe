@@ -36,7 +36,7 @@ public class PrepareDB {
 			statement.executeUpdate("create table subscriptions (email varchar(100), artist varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
 			statement.executeUpdate("create table locations (email varchar(100), location varchar(100), FOREIGN KEY(email) REFERENCES subscriber(email) ON DELETE CASCADE)");
 			
-			statement.executeUpdate("CREATE TABLE CAMEL_MESSAGEPROCESSED (processorName VARCHAR(255) UNIQUE, messageId VARCHAR(100) PRIMARY KEY, createdAt TIMESTAMP)");
+			statement.executeUpdate("CREATE TABLE CAMEL_MESSAGEPROCESSED (processorName VARCHAR(255), messageId VARCHAR(100) PRIMARY KEY, createdAt TIMESTAMP)");
 		}
 		catch(SQLException e)
 		{

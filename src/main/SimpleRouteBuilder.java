@@ -96,7 +96,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		//Grabbers
 		
 		// Launch all grabbers
-		from("timer://foo2?repeatCount=1&delay=0").multicast().to("direct:startGrabbers","direct:startLastFM");
+		from("jetty:http://localhost:12345/grabber").multicast().to("direct:startGrabbers","direct:startLastFM");
 		
 		from("direct:startGrabbers")
 		.to("metrics:timer:all-grabbers.timer?action=start")
@@ -121,7 +121,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("direct:mongoInsert");
 
 		// Hipchat playlist workflow
-		from("timer://foo4?repeatCount=1&delay=0")
+		from("jetty:http://localhost:12345/hipchat")
 		.to("metrics:timer:hipchat-process.timer?action=start")
 		.setHeader("type", simple("youtube"))
 		.setHeader("caller", simple("hipchat"))
@@ -202,7 +202,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 
 		
 		// test
-		from("timer://newsletter?repeatCount=1&delay=0")
+		from("jetty:http://localhost:12345/newsletter")
 		.log("--------------------timer fired..--------------------------------")
 	// setHeader caller: hipchat? @Peter fragen
 		.setHeader("caller", simple("newsletter"))
@@ -269,9 +269,12 @@ public class SimpleRouteBuilder extends RouteBuilder {
 				System.out.println(exchange.getIn().getHeader("To"));
 			}
 	    })
-		.to("smtps://"+p.getProperty("email.testhost")+"?username="+p.getProperty("email.testuser")
-				+"&password="+p.getProperty("email.testpassword"));//+"&to="+p.getProperty("email.testreceiver"));
-		//.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
+		.to("smtps://"+p.getProperty("email.host")+"?username="+p.getProperty("email.user")
+				+"&password="+p.getProperty("email.password")+"&From="+p.getProperty("email.user"));//+"&to="+p.getProperty("email.testreceiver"));
+		
+	//	.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user"));//+"&to="+p.getProperty("email.user")); 
+	
+		//	.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
 //		.pollEnrich("direct:mongoGetArtist", new GrabberAggregationStrategy())
 		//.setHeader("Newsletter",simple("newsletter-generation"))
@@ -294,11 +297,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		
 		// Sending Newsletter -> Versuch
-		from("file:fm-in?noop=true")
+/*		from("file:fm-in?noop=true")
 		.log("Working on file ${header.CamelFileName}")
 		.setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}
 		.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user") +"&to="+p.getProperty("email.user")); 
-
+*/
 		/*zum Experimentieren
 		 * 
 		 * //	"smtp://you@mymailserver.com?password=secret&From=you@apache.org" + recipients
@@ -353,14 +356,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new UniqueHashHeaderProcessor())
 		.idempotentConsumer(header("hash"), repo)
 		.to("metrics:counter:mongo-getArtist.counter")
-		.to("direct:chooseCall")
-		.to("metrics:timer:mongo-getArtist.timer?action=stop");
-		
-		
-		// Routing for results from MongoDB
-		from("direct:chooseCall")
-		.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end();
-		//.choice().when(header("caller").isEqualTo("newsletter")).to("direct:sendNewsletter").end();
+		.to("metrics:timer:mongo-getArtist.timer?action=stop")
+		.to("direct:sendHipchat");
 
 		
 		//gets all data for a single Artist
@@ -410,20 +407,16 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.aggregate(header("artist").append(header("subscriber")), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
 		.to("metrics:counter:mongo-getFullArtist.counter")
 	//	.to("mock:sortArtists")
-		.to("direct:chooseCallFullArtist")
-		.to("metrics:timer:mongo-getFullArtist.timer?action=stop");
-		
-		from("direct:chooseCallFullArtist")
-	//	.choice().when(header("caller").isEqualTo("hipchat")).to("direct:sendHipchat").end()
-		.choice().when(header("caller").isEqualTo("newsletter")).to("direct:aggregateAll").end();
+		.to("metrics:timer:mongo-getFullArtist.timer?action=stop")
+		.to("direct:aggregateAll");
 
 		
 		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
 
-		     from("timer://runOnce?repeatCount=2&delay=5000")
+//		     from("timer://runOnce?repeatCount=2&delay=5000")
 //		     .to("direct:testFindAll");
 //		     .to("direct:testInsert");
-		     .to("direct:testFindById");
+//		     .to("direct:testFindById");
 		//     .to("direct:testRemove");
 		//     .to("direct:mongoGetArtists");
 		     
@@ -495,5 +488,10 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000)
 		.to("log:mongo:findAll3?level=INFO");    	
 
+	}
+
+	private void to(String string) {
+		// TODO Auto-generated method stub
+		
 	}  
 }
