@@ -340,10 +340,14 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.recipientList(simple("mongodb:mongoBean?database=smile&collection=${header.artist}&operation=findAll"))
 		.split().body()
 		.process(new MongoResultProcessor())
-		.process(new UniqueHashHeaderProcessor())
-		.idempotentConsumer(header("hash"), repo)
-		.to("direct:endMongoGetFullArtist");
-
+		.choice()
+		.when(header("type").isNotEqualTo("youtube"))
+			.to("direct:wiretapLogging")
+			.process(new UniqueHashHeaderProcessor())
+			.idempotentConsumer(header("hash"), repo)
+			.to("direct:endMongoGetFullArtist").endChoice()
+		.otherwise()
+			.to("direct:endMongoGetFullArtist");
 		
 		//gets data for a single artist from
 		//lastFM add header "location" to filter
@@ -371,8 +375,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
 
-		// from("timer://runOnce?repeatCount=2&delay=5000")
-		// .to("direct:testFindAll");
+//		 from("timer://runOnce?repeatCount=2&delay=5000")
+//		 .to("direct:testFindAll");
 		// .to("direct:testInsert");
 		// .to("direct:testFindById");
 		// .to("direct:testRemove");
