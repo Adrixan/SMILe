@@ -18,6 +18,9 @@ import pojo.AlbumPojo;
 import pojo.ArtistPojo;
 import pojo.LocationPojo;
 
+/* ArtistPojo fuer Template und Newsletter Erzeugung (vgl. Artist Data Object)
+ * Pro Grabber wird eine Section erzeugt.
+ */
 public class ArtistPojoProcessor implements Processor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtistPojoProcessor.class);
@@ -28,8 +31,6 @@ public class ArtistPojoProcessor implements Processor {
 		Message out = exchange.getIn();
 		
 		String newBody="";
-			//System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().toString());
-			//System.out.println("------Nachricht ArtistPojoProcessor -------"+out.getBody().getClass().toString());
 		
 		HashMap<String, Object> bodyMap =  (HashMap<String, Object>) out.getBody();
 		
@@ -39,6 +40,7 @@ public class ArtistPojoProcessor implements Processor {
 		HashMap<String, Object> lastFmMap = (HashMap<String, Object>) bodyMap.get("lastFM");
 		HashMap<String, Object> amazonMap = (HashMap<String, Object>) bodyMap.get("amazon");
 		
+		// falls keine Events vorhanden sind -> loesche HashMap mit lastFm
 		if (lastFmMap != null) {
 			lastFmMap.remove("_id");
 		}
@@ -91,7 +93,6 @@ public class ArtistPojoProcessor implements Processor {
 			
 			for(Entry<String,Object> e:lastFMLocations){
 				LocationPojo lp = new LocationPojo(e.getKey()); // Key: LocationName
-				//System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+lp.getLocationName());
 				
 				HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //LocationName Datum: Webseite
 				ArrayList<String> event = new ArrayList<String>();
@@ -133,32 +134,51 @@ public class ArtistPojoProcessor implements Processor {
 		/*
 		 *  Amazon Section starts here
 		 */
-		amazonMap.remove("_id");
-		ArrayList<Entry<String,Object>> amazonEntries = new ArrayList<Entry<String,Object>>(amazonMap.entrySet());
-		ArrayList<AlbumPojo> albenPojo = new ArrayList<AlbumPojo>();
+		if ( amazonMap != null) {
+			amazonMap.remove("_id");
+		}
 		
-		for(Entry<String,Object> e:amazonEntries){
-			AlbumPojo ap = new AlbumPojo(e.getKey());		//  Key: AmazonUid 
-			// System.out.println("xxxxxxxxxAlbumPOJOxxxxxxxxxxxxxxxxxxxxxxxx"+ap.getAmazonUid());
-			
-			HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); //"title = xxx"
+		if (amazonMap != null) {
+			ArrayList<Entry<String, Object>> amazonEntries = new ArrayList<Entry<String, Object>>(
+					amazonMap.entrySet());
+			ArrayList<AlbumPojo> albenPojo = new ArrayList<AlbumPojo>();
+
+			for (Entry<String, Object> e : amazonEntries) {
+				AlbumPojo ap = new AlbumPojo(e.getKey()); // Key: AmazonUid
+
+				HashMap<String, Object> hashi = (HashMap<String, Object>) e.getValue(); // "title = xxx"
+				ArrayList<Album> alben = new ArrayList<Album>();
+
+				Album newAlbum = new Album();
+				newAlbum.setTitle((String) hashi.get("title"));
+				newAlbum.setPrice((String) hashi.get("price"));
+				newAlbum.setImageurl((String) hashi.get("imageurl"));
+				newAlbum.setPageurl((String) hashi.get("pageurl"));
+
+				alben.add(newAlbum);
+				ap.setAlben(alben);
+				albenPojo.add(ap);
+			}
+			artistPojo.setAmazonSection(albenPojo);
+		}
+		else {
+			ArrayList<AlbumPojo> albenPojo = new ArrayList<AlbumPojo>();
 			ArrayList<Album> alben = new ArrayList<Album>();
 			
+			if(albenPojo.isEmpty()){
 				
-			Album newAlbum = new Album();
-			newAlbum.setTitle((String) hashi.get("title"));
-			newAlbum.setPrice((String) hashi.get("price"));
-			newAlbum.setImageurl((String) hashi.get("imageurl"));
-			newAlbum.setPageurl((String) hashi.get("pageurl"));
+				AlbumPojo ap = new AlbumPojo();
+				ap.setAlbenEmpty();
+				albenPojo.add(ap);
+			}
 			
-			alben.add(newAlbum);
-			ap.setAlben(alben);
-			albenPojo.add(ap);
+			artistPojo.setAmazonSection(albenPojo);
 		}
-		artistPojo.setAmazonSection(albenPojo);
 		
 		
 		
+		
+		// body setzten (artistPojo) - wichtig fuers Template befuellen
 		out.setBody(artistPojo);
 		exchange.setIn(out);	
 	}

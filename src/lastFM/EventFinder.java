@@ -12,6 +12,7 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.mortbay.log.Log;
 
+// Processor EventFinder fuer Last.fm 
 public class EventFinder implements Processor {
 	
 	Properties p = Launcher.properties;
@@ -19,8 +20,6 @@ public class EventFinder implements Processor {
 	@Override
 	public void process(Exchange arg0) throws Exception {
 		Message m = arg0.getIn();
-		//System.out.println("Message: "+m);
-		Log.info("Message: "+m);
 		String locationFromBody="";
 		
 		HashMap<String,String> body = (HashMap<String,String>) m.getBody();
@@ -29,13 +28,8 @@ public class EventFinder implements Processor {
 		m.setHeader("type", "lastFM");
         
         LastFMService lfm = new LastFMService(body.get("artist"), p.getProperty("lastFM.apiKey"));
-     /*   if(body.get("location").contains("oe")){
-        	locationFromBody=body.get("location").replaceAll("oe", "�");
-        }*/
-		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist").trim(), body.get("location").trim());//locationFromBody);
-		//List<pojo.Event> eventList = lfm.getUpcomingEventsInGeo(body.get("artist"), body.get("location"));
-		
-		// TODO: �berpr�fung, wenn keine Events vorhanden -> Dead Letter Channel
+   
+		List<pojo.Event> eventList = lfm.getUpcomingEvents(body.get("artist").trim(), body.get("location").trim());
 		
 		if(eventList.isEmpty()==false && !eventList.equals(null)){
 			Log.debug("Events gefunden");
@@ -44,7 +38,8 @@ public class EventFinder implements Processor {
 			Log.debug("Keine Events gefunden");
 		}
 		
-		//body setzen -> HM <Location, HM<Name von Event: Datum>>
+		// Format Preparation fuer Mongo-Db
+		// body setzen -> HM <Location, HM<Name von Event: Datum>>
 		// HM <Location, HM<Name von Event Datum : Webseite>>
 		HashMap<String,HashMap<String,String>> eventsForMongo = new HashMap<String,HashMap<String,String>>();
 		String location="";
@@ -76,7 +71,7 @@ public class EventFinder implements Processor {
 				hashi.put(e.getTitle().toString()+" "+e.getDate().toString(), website);
 			}
 			
-			// Ausgabe, welche Events f�r welchen Artist gespeicher wurden
+			// Ausgabe, welche Events fuer welchen Artist gespeichert wurden
 			for (Entry<String, HashMap<String,String>> ent : eventsForMongo.entrySet()){
 				Log.debug("Last.FM: "+ent.getKey()+" und Value"+ent.getValue().toString());
 			}
