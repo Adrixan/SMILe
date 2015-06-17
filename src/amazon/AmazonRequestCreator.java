@@ -49,6 +49,6 @@ public class AmazonRequestCreator implements Processor {
 
 		String signedParams = signHelper.sign (amazonParams);
 
-        m.setHeader("amazonRequestURL", "http4://" + Launcher.properties.getProperty("amazon.endpoint") + "/onca/xml?" + signedParams);
+        m.setHeader("amazonRequestURL", "http4://" + Launcher.properties.getProperty("amazon.endpoint") + "/onca/xml?" + signedParams + "&bridgeEndpoint=true");
 	}
 }
