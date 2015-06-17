@@ -65,6 +65,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new DeadLetterProcessor())
 		.to("file:dlc?fileName=exception_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 		
+		this.getContext().setMessageHistory(true);
+		
 		// Enable global metrics support
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
@@ -273,6 +275,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 	    .completionInterval(5000)
 	    .to("velocity:file:template/newsletter.vm").id("velocityTemplate")
 	    .convertBodyTo(String.class)
+	    .log("------------------Sending Newsletter to Subscriber")
 	    .setHeader("Subject", constant("SMILe Newsletter"))
 	    .process(new Processor() {
 			@Override
@@ -282,7 +285,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			}
 	    })
 	    // Newsletter per SMTP an Subscriber senden
-	    .log("------------------Sending Newsletter to Subscriber")
 		.to("smtps://"+p.getProperty("email.host")+"?username="+p.getProperty("email.user")
 				+"&password="+p.getProperty("email.password")+"&From="+p.getProperty("email.user"));
 		
