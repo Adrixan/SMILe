@@ -58,6 +58,8 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		 **--------------------
 		 */
 		//DeadLetterChannel
+		//All messages that produce an exception are moved to the dlc folder
+		//Exception details are added to the file
 		from("direct:DLCRoute")
 		.process(new DeadLetterProcessor())
 		.to("file:dlc?fileName=exception_${date:now:yyyyMMdd_HHmmssSSS}.txt");
@@ -68,7 +70,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		MetricsRoutePolicyFactory mrpf = new MetricsRoutePolicyFactory();
 		this.getContext().addRoutePolicyFactory(mrpf);
 		
-		//TODO: Find a way to get datasource from Launch
 		BasicDataSource ds = new BasicDataSource();
 		ds.setDriverClassName("com.mysql.jdbc.Driver");
 		ds.setUrl("jdbc:mysql://" + p.getProperty("rdbm.host") + "/" + p.getProperty("rdbm.database") +"?"
