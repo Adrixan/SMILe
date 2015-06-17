@@ -5,11 +5,9 @@ import helper.ArtistDefiner;
 import helper.DeadLetterProcessor;
 import hipchat.HipchatMessageProcessor;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 import mongodb.MongoAggregationStrategy;
-import mongodb.MongoByArtistProcessor;
 import mongodb.MongoFilterProcessor;
 import mongodb.MongoFixArtistString;
 import mongodb.MongoInsertProcessor;
@@ -17,7 +15,6 @@ import mongodb.MongoResultProcessor;
 import mongodb.UniqueHashHeaderProcessor;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
@@ -324,11 +321,10 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		//routes to mongoGetTwitterYTAmazon and
 		//mongoGetLastFM
 		from("direct:mongoGetFullArtist")
-				//.convertBodyTo(String.class)
-				//.to("file:fm-out?fileName=getArtistMessageFullZeug_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=start")
 		.multicast().parallelProcessing().to("direct:mongoGetTwitterYTAmazon", "direct:mongoGetLastFM");
 		
+		//Build DBObject to get only twitter, youtube and amazon
 		String in[] = new String[] {"twitter", "youtube", "amazon"};
 		DBObject querryHelper = BasicDBObjectBuilder.start().add("$in", in).get();
 		DBObject querry = BasicDBObjectBuilder.start().add("_id", querryHelper).get();			
@@ -344,7 +340,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.process(new MongoResultProcessor())
 		.choice()
 		.when(header("type").isNotEqualTo("youtube"))
-			.to("direct:wiretapLogging")
 			.process(new UniqueHashHeaderProcessor())
 			.idempotentConsumer(header("hash"), repo)
 			.to("direct:endMongoGetFullArtist").endChoice()
@@ -370,83 +365,7 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		from("direct:endMongoGetFullArtist")
 		.aggregate(header("artist").append(header("subscriber")), new MongoAggregationStrategy()).completionInterval(5000) //subscriber
 		.to("metrics:counter:mongo-getFullArtist.counter")
-	//	.to("mock:sortArtists")
 		.to("metrics:timer:mongo-getFullArtist.timer?action=stop")
 		.to("direct:aggregateAll");
-
-		
-		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
-
-//		 from("timer://runOnce?repeatCount=2&delay=5000")
-//		 .to("direct:testFindAll");
-		// .to("direct:testInsert");
-		// .to("direct:testFindById");
-		// .to("direct:testRemove");
-		// .to("direct:mongoGetArtists");
-		     
-		HashMap<String,HashMap<String,String>> mongoTest = new HashMap<String,HashMap<String,String>>();
-		HashMap<String,String> mongoTest2 = new HashMap<String,String>();
-		mongoTest2.put("Foo", "Bar");
-		HashMap<String,String> mongoTest3 = new HashMap<String,String>();
-		mongoTest3.put("Fun", "Park");
-		mongoTest.put("St. P�lten", mongoTest2);
-		mongoTest.put("Wien", mongoTest3);
-		mongoTest.put("New York", mongoTest2);	
-		
-		from("direct:testInsert")
-		.setHeader("artist")
-		.simple("blind guardian")
-		.setHeader("type")
-		.simple("test")
-		.setBody().constant(mongoTest)
-		.process(new MongoInsertProcessor())
-		.process(new MongoFixArtistString())
-		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=save"));
-
-		from("direct:testRemove")
-		.setHeader("artist")
-		.simple("slayer")
-		.setHeader("type")
-		.simple("test")       
-		.process(new MongoByArtistProcessor())
-		.process(new MongoFixArtistString())
-		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=remove"));
-		
-		JdbcMessageIdRepository testRepo = new JdbcMessageIdRepository(ds, "test");
-		
-		from("direct:testFindById")
-		.setHeader("artist").simple("blind guardian")
-		.setHeader("type").simple("test")
-		.setHeader("subscriber").simple("testsub")
-		.setBody()
-		.simple("${header.type}")
-		.process(new MongoFilterProcessor())
-		.process(new MongoFixArtistString())
-		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findById"))
-		.to("log:mongo:findById1?level=INFO")
-		.process(new MongoResultProcessor())
-		.process(new UniqueHashHeaderProcessor())
-		.to("log:mongo:findById2?level=INFO")
-		.idempotentConsumer(header("hash"), testRepo)
-		.to("direct:wiretapLogging")
-		.to("log:mongo:findById3?level=INFO");
-
-		String hin[] = new String[] {"test", "test3"};
-		DBObject helper = BasicDBObjectBuilder.start().add("$in", hin).get();
-		DBObject testQuerry = BasicDBObjectBuilder.start().add("_id", helper).get();		
-		
-		from("direct:testFindAll")
-		.setHeader("artist")
-		.simple("blind guardian")
-//		.setBody().constant(testQuerry)
-		.process(new MongoFixArtistString())
-		.recipientList(simple("mongodb:mongoBean?database=test&collection=${header.artist}&operation=findAll"))
-		.to("log:mongo:findAll1?level=INFO")
-		.split().body()
-		.to("log:mongo:findAll2?level=INFO")   
-		.process(new MongoResultProcessor())
-		.aggregate(header("artist"), new MongoAggregationStrategy()).completionInterval(5000)
-		.to("log:mongo:findAll3?level=INFO");    	
-
 	}
 }

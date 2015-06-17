@@ -1,13 +1,10 @@
 package mongodb;
 
 import java.util.HashMap;
-import java.util.Iterator;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 

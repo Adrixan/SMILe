@@ -6,7 +6,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class MongoResultProcessor implements Processor{

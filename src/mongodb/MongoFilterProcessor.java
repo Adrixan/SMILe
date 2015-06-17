@@ -6,7 +6,6 @@ import org.apache.camel.Processor;
 
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import com.oracle.xmlns.internal.webservices.jaxws_databinding.ExistingAnnotationsType;
 
 public class MongoFilterProcessor implements Processor{
 	

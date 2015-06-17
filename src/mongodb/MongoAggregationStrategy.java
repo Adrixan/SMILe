@@ -19,7 +19,6 @@ public class MongoAggregationStrategy implements AggregationStrategy {
        }	   
        
        grabberItem = (HashMap) newExchange.getIn().getBody();
-       //System.out.println("##############################grabberItem: "+grabberItem);
        Object id = grabberItem.get("_id");
        if (id != null){
     	   fullArtist.put(id.toString(), grabberItem);
