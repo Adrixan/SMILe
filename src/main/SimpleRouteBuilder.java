@@ -214,27 +214,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.wireTap("direct:wiretapLogging")
 		.to("direct:mongoInsert");		
 		
-		// Amazon grabber starts here
-
-				// Amazon Route
-				from("direct:amazon")
-				.setHeader("type",simple("amazon"))
-				.wireTap("direct:wiretapLogging")
-				.to("metrics:timer:amazon-process.timer?action=start")
-				.process(new AmazonRequestCreator())
-				.recipientList(header("amazonRequestURL")).ignoreInvalidEndpoints()
-				.split().tokenizeXML("Item").streaming()
-				.setHeader("amazon_uid").xpath("/Item/ASIN/text()", String. class)
-				.setHeader("amazon_title").xpath("/Item/ItemAttributes/Title/text()", String. class)
-				.setHeader("amazon_pageurl").xpath("/Item/DetailPageURL/text()", String. class)
-				.setHeader("amazon_imageurl").xpath("/Item/LargeImage/URL/text()", String. class)
-				.setHeader("amazon_price").xpath("/Item/OfferSummary/LowestNewPrice[1]/FormattedPrice/text()", String. class)
-				.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
-				.to("metrics:timer:amazon-process.timer?action=stop")
-				.wireTap("direct:wiretapLogging")
-			//	.process(new AmazonMongoTester())
-				.to("direct:mongoInsert");	
-
 
 		/**
 		 **--------------------
