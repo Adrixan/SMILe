@@ -3,6 +3,7 @@ package pojo;
 
 import java.sql.Date;
 
+// Events fuer Last.fm Daten
 public class Event implements Comparable<Event> {
 
 	private int id;

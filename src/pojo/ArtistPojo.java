@@ -2,6 +2,7 @@ package pojo;
 
 import java.util.ArrayList;
 
+// Artist-Pojo fuer Newsletter Erzeugung (pro Grabber eine vorgesehene Section)
 public class ArtistPojo {
 
 	private String artistName = "";

@@ -2,6 +2,7 @@ package pojo;
 
 import java.util.ArrayList;
 
+//Album-Pojo fuer Amazon Daten (pro Album ein Eintrag in einer Liste)
 public class AlbumPojo {
 
 	private String amazonUid="";
@@ -12,6 +13,9 @@ public class AlbumPojo {
 		this.amazonUid = key;
 	}
 	
+	public AlbumPojo() {
+	}
+
 	public String getAmazonUid() {
 		return amazonUid;
 	}
@@ -26,6 +30,11 @@ public class AlbumPojo {
 
 	public void setAlben(ArrayList<Album> alben) {
 		this.alben = alben;
+	}
+
+	public void setAlbenEmpty() {
+		this.amazonUid = "No alben available!";
+		
 	}
 	
 

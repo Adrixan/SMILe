@@ -6,10 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
-
-
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,10 +13,8 @@ import de.umass.lastfm.Artist;
 import de.umass.lastfm.Event;
 import de.umass.lastfm.Geo;
 import de.umass.lastfm.PaginatedResult;
-// import com.sepm08.playITsmart.dao.IArtistDAO
 
-
-
+// Grabber LastFM
 public class LastFMService {
 
 	private Log log = LogFactory.getLog(LastFMService.class);
@@ -47,10 +41,8 @@ public class LastFMService {
 
 		this.artist = artist;
 
-		System.out.println("------------------------------------Artist " +this.artist);
+		log.info("Artist fuer Last.fm " +this.artist);
 		Collection<Event> elist = Artist.getEvents(this.artist, this.API_KEY).getPageResults();
-
-		System.out.println("Null oder nicht fuer Artist " +this.artist+ ": " +elist.size());
 
 		List<pojo.Event> retlist = new ArrayList<pojo.Event>();
 
@@ -70,12 +62,10 @@ public class LastFMService {
 				event.setWebsite(e.getWebsite());
 
 				event.setDate(new Date(e.getStartDate().getTime()));
-				log.debug("!!Datum: " + event.getDate());
-
 				retlist.add(event);
 
-				System.out.println("Event fuer "+this.artist+ ": "+event.toString()+" und Location = "+event.getCountry()+
-						"\nWebseite: "+event.getWebsite());
+				/*log.info("Event fuer "+this.artist+ ": "+event.toString()+" und Location = "+event.getCountry()+
+						"\nWebseite: "+event.getWebsite());*/
 
 			}
 
@@ -112,7 +102,6 @@ public class LastFMService {
 					if(artistList.next().equals(artist)){ 
 						pojo.Event event = new pojo.Event();
 
-						System.out.println("BAMMMMM ---------------------------------------------");
 						event.setArtist(this.artist);
 						event.setId(e.getId());
 						event.setTitle(e.getTitle());
@@ -124,30 +113,15 @@ public class LastFMService {
 
 						retlist.add(event);
 
-						System.out.println("----------GeoEvent fuer "+artist+ ": "+event.toString()+" und Location = "+event.getCountry());
-
 					}
 				}
 
 			}
 		}
 		Collections.sort(retlist);
-		System.out.println("Groesse der Liste: "+retlist.size());
 
 		return retlist;
 
 	}
-
-	//	public String getAlbumCover(String artist, String album) {
-	//		if (artist == null || album == null)
-	//			throw new NullPointerException();
-	//
-	//		Album albi = Album.getInfo(artist, album, API_KEY);
-	//
-	//		if (albi != null) {
-	//			return albi.getImageURL(ImageSize.LARGE);
-	//		}
-	//		return null;
-	//	}
 
 }

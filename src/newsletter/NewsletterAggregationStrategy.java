@@ -8,6 +8,7 @@ import org.apache.camel.processor.aggregate.AggregationStrategy;
 
 import pojo.ArtistPojo;
 
+// AggregationsStrategy um Artist-messages (mehrere) von Subscriber zu mergen -> zu einer einzigen Nachricht
 public class NewsletterAggregationStrategy implements AggregationStrategy {
 
 	@Override

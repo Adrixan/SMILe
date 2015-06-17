@@ -2,6 +2,7 @@ package pojo;
 
 import java.util.ArrayList;
 
+// Location-Pojo fuer Last.fm Daten (pro Location ein Eintrag in einer Liste) 
 public class LocationPojo {
 	
 	private String locationName;

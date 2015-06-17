@@ -24,7 +24,6 @@ import org.apache.camel.builder.RouteBuilder;
 import lastFM.EventFinder;
 import metrics.MetricsProcessor;
 import newsletter.ArtistPojoProcessor;
-import newsletter.EnrichWithSubscribers;
 import newsletter.HeaderChangerProcessor;
 import newsletter.NewsletterAggregationStrategy;
 import newsletter.SubscriberLocationProcessor;
@@ -56,6 +55,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		//Set DeadLetterChannel Route
 		errorHandler(deadLetterChannel("direct:DLCRoute"));
 		
+		/**
+		 **--------------------
+		 **Dead Letter Channel
+		 **--------------------
+		 */
 		//DeadLetterChannel
 		from("direct:DLCRoute")
 		.process(new DeadLetterProcessor())
@@ -77,6 +81,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		from("direct:wiretapLogging").setBody(simple("${headers}\n\n${body}")).convertBodyTo(String.class).to("file:out?fileName=WiretapLogging_${date:now:yyyyMMdd_HHmmssSSS}.txt");
 
+		/**
+		 **--------------------
+		 **Subscription-Route
+		 **--------------------
+		 */
 		// Subscription handling
 		// Polling Consumer
 		from("imaps://" + p.getProperty("email.host") + "?username=" + p.getProperty("email.user") +"&password=" + p.getProperty("email.password"))
@@ -95,7 +104,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.split(new SqlSplitExpression()).to("jdbc:accounts").to("metrics:counter:RDBM-write.counter").end()
 		.to("metrics:timer:RDBM-write.timer?action=stop");
 		
-		//Grabbers
+		/**
+		 **--------------------
+		 **all Grabbers
+		 **--------------------
+		 */
 		
 		// Launch all grabbers
 		from("jetty:http://localhost:12345/grabber").multicast().to("direct:startGrabbers","direct:startLastFM");
@@ -111,6 +124,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("metrics:timer:all-grabbers.timer?action=stop");
 
 
+		/**
+		 **--------------------
+		 **Twitter Grabber-Route
+		 **--------------------
+		 */
 		// we can only get tweets from the last 8 days here!!!
 		from("direct:twittergrabber")
 		.setHeader("type",simple("twitter"))
@@ -122,6 +140,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.wireTap("direct:wiretapLogging")
 		.to("direct:mongoInsert");
 
+		/**
+		 **--------------------
+		 **Hipchat -Route
+		 **--------------------
+		 */
 		// Hipchat playlist workflow
 		from("jetty:http://localhost:12345/hipchat")
 		.to("metrics:timer:hipchat-process.timer?action=start")
@@ -150,7 +173,13 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("hipchat://?authToken=" + p.getProperty("hipchat.authtoken"))
 		.to("metrics:counter:playlists-sent-hipchat.counter");
 
+		/**
+		 **--------------------
+		 **LastFM Grabber-Route
+		 **--------------------
+		 */
 		// LastFM grabber starts here 
+		// uses Processor to find Events
 		from("direct:startLastFM")
 		.to("metrics:timer:lastfm-process.timer?action=start")
 		.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email=locations.email "))
@@ -161,6 +190,11 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("direct:mongoInsert")
 		.to("metrics:timer:lastfm-process.timer?action=stop");
 
+		/**
+		 **--------------------
+		 **Amazon Grabber-Route
+		 **--------------------
+		 */
 		// Amazon grabber starts here
 		// (uses Processor, Recipientlist, Splitter with Tokenizer, XPath, Custom Aggregation Strategy and WireTap)
 		from("direct:amazon")
@@ -179,16 +213,46 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		.to("metrics:timer:amazon-process.timer?action=stop")
 		.wireTap("direct:wiretapLogging")
 		.to("direct:mongoInsert");		
+		
+		// Amazon grabber starts here
+
+				// Amazon Route
+				from("direct:amazon")
+				.setHeader("type",simple("amazon"))
+				.wireTap("direct:wiretapLogging")
+				.to("metrics:timer:amazon-process.timer?action=start")
+				.process(new AmazonRequestCreator())
+				.recipientList(header("amazonRequestURL")).ignoreInvalidEndpoints()
+				.split().tokenizeXML("Item").streaming()
+				.setHeader("amazon_uid").xpath("/Item/ASIN/text()", String. class)
+				.setHeader("amazon_title").xpath("/Item/ItemAttributes/Title/text()", String. class)
+				.setHeader("amazon_pageurl").xpath("/Item/DetailPageURL/text()", String. class)
+				.setHeader("amazon_imageurl").xpath("/Item/LargeImage/URL/text()", String. class)
+				.setHeader("amazon_price").xpath("/Item/OfferSummary/LowestNewPrice[1]/FormattedPrice/text()", String. class)
+				.aggregate(header("artist"), new AmazonAggregationStrategy()).completionTimeout(5000)
+				.to("metrics:timer:amazon-process.timer?action=stop")
+				.wireTap("direct:wiretapLogging")
+			//	.process(new AmazonMongoTester())
+				.to("direct:mongoInsert");	
 
 
+		/**
+		 **--------------------
+		 **Youtube Grabber-Route
+		 **--------------------
+		 */
 		// Youtube grabber starts here
-
 		from("direct:youtubeAPI")
 			.setHeader("type",simple("youtube"))
 			.process(new YoutubeChannelProcessor())
 			.to("metrics:counter:YouTube-Playlists-generated.counter")
 			.to("direct:mongoInsert");
 
+		/**
+		 **--------------------
+		 **Metrics -Route
+		 **--------------------
+		 */
 		from("jetty:http://localhost:12345/stats").process(new MetricsProcessor());
 
 		/**
@@ -197,86 +261,39 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		 **--------------------
 		 */
 		
-		EnrichWithSubscribers enrichWithSubscribers;
-
-		/* TODO:
-		 * Artist-Pojo Klasse verfeinern
-		 * richtig aggregieren: momentan pro Artist eine Message (Ellie Goulding wird einmal mit anderen Location geschluckt)
-		 * -> es m�ssen alle Artists von einem Subscriber in einer Message sein
-		 * �berlegung, wie Pojo bzw. Template aussieht (welche Teile dynamisch: beispiel Last.fm -> wenn kein Event stattfindet)
-		 * Mail mit Subscriber enrichen (from, to, subject) als Header setzen
-		 * Senden via SMTP 
-		 * */
-		
-		
-//		from("timer:newsletter?period=86400000") //can be set to specific time "time=yyyy-MM-dd HH:mm:ss" or just set the period to one day "period=86400000"
-//		.log("--------------------timer fired..--------------------------------").
-//		split(body()).
-//		process(enrichWithSubscribers).
-//		to("smtp://").
-//		log("-------------------FINISHED--------------------------------------");
-
-		
-		// test
-		from("jetty:http://localhost:12345/newsletter")
-		.log("--------------------timer fired..--------------------------------")
-	// setHeader caller: hipchat? @Peter fragen
+		// alle Subscriber aus SQL-DB holen (pro Subscriber eine Message)
+		// uses Processor (HeaderChanger, SubscriberLocation), Custom Aggregation Strategy (Message with more Artists for 1 Subscriber) 
+		// and Content Enricher (Velocity and Message Merge)
+		from("jetty:http://localhost:12345/newsletter")	//can be set to specific time "time=yyyy-MM-dd HH:mm:ss" or just set the period to one day "period=86400000"
+		.log("--------------------Newsletter Generation starts--------------------------------")
 		.setHeader("caller", simple("newsletter"))
 		.setBody(simple("select email from subscriber"))
 		.to("jdbc:accounts")
 		.split(body())
 		.setBody(body().regexReplaceAll("\\{email=(.*)(\\r)?\\}", "$1"))
-		.to("direct:getArtistsForNewsletter")
-		.log("-------------------FINISHED--------------------------------------");
+		.to("direct:getArtistsForNewsletter");
 		
+		// Artist und Location Info aus SQL-DB holen (pro Artist eine Message)
 		from("direct:getArtistsForNewsletter")
-		.log("--------------------getArtistsForNewsletter..--------------------------------")
 		.setHeader("subscriber", body())
-		//.setBody(simple("select artist from subscriptions where email = '${body}'"))
 		.setBody(simple("SELECT subscriptions.artist, locations.location FROM subscriptions,locations WHERE subscriptions.email='${body}' and locations.email = '${body}' "))
-	// toDO: Locations rausfiltern -> Kreuzprodukt
-	// .setBody(simple("select artist from subscriptions where email = '${body}'"))
 		.to("jdbc:accounts")
 		.process(new SubscriberLocationProcessor())
 		.split(body())
 		.process(new HeaderChangerProcessor())
-			// f�r Testzwecke
+			// fuer Testzwecke
 			//.convertBodyTo(String.class)
 			//.to("file:fm-out?fileName=getArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt")
 		.to("direct:mongoGetFullArtist");
 		
-			//		from("direct:sendNewsletter")
-			//		.log("--------------------sendNewsletter..--------------------------------")
-					//.setHeader("youtube", body())
-					//.setHeader("type", simple("twitter"))
-			//		.log("------------------Sending Newsletter to File")
-					//.to("file:fm-out?fileName=getPlaylist_${date:now:yyyyMMdd_HHmmssSSS}.txt")
-//		.to("direct:mongoGetFullArtist");
-		
+	
+		// Newsletter-Aggregation (mit allen Grabber-Daten wird Template befuellt)
 		from("direct:aggregateAll")
-
-	//	.split(body())
-//		.aggregate(header("artist"), new NewsletterFullArtist()) //header("subscriber")
-//		.completionInterval(5000)
-
-	    .log("********************** Aggregator ALL  **************************")
-	    .log("------------------Sending Newsletter to File")
 	    .process(new ArtistPojoProcessor())
-	//    .aggregate(header("subscriber"), new NewsletterFullArtist()) //header("subscriber")
-	//	.completionInterval(5000)
 	    .aggregate(header("subscriber"), new NewsletterAggregationStrategy())
 	    .completionInterval(5000)
 	    .to("velocity:file:template/newsletter.vm").id("velocityTemplate")
 	    .convertBodyTo(String.class)
-	    
-	    // Content Enricher
-//	    .pollEnrich(resourceUri)
-	    
-	    /*
-	     * toDo: aggregieren oder enrichen (mit subsriber) -> alle aritst f�r einen subscriber in eine message!!! 
-	     * Header setzen: TO/FROM/Subject
-	     * Senden per smtp -> siehe route weiter unten (vorher schon header setzen: wichtig)
-	     * */
 	    .setHeader("Subject", constant("SMILe Newsletter"))
 	    .process(new Processor() {
 			@Override
@@ -285,50 +302,18 @@ public class SimpleRouteBuilder extends RouteBuilder {
 				System.out.println(exchange.getIn().getHeader("To"));
 			}
 	    })
+	    // Newsletter per SMTP an Subscriber senden
+	    .log("------------------Sending Newsletter to Subscriber")
 		.to("smtps://"+p.getProperty("email.host")+"?username="+p.getProperty("email.user")
-				+"&password="+p.getProperty("email.password")+"&From="+p.getProperty("email.user"));//+"&to="+p.getProperty("email.testreceiver"));
-		
-	//	.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user"));//+"&to="+p.getProperty("email.user")); 
-	
-		//	.to("file:fm-out?fileName=getFullArtistMessage_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-		
-//		.pollEnrich("direct:mongoGetArtist", new GrabberAggregationStrategy())
-		//.setHeader("Newsletter",simple("newsletter-generation"))
-		//.setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}		
-//		
-////		.setHeader("Subject", constant("Thanks for ordering"))
-////		.setHeader("From", constant("donotreply@riders.com"))
-//		//.process(new HipchatMessageProcessor())
-//		//.to("velocity:file:template/newsletter.vm")
-////		.to("velocity:file:template/newsletter.vm")
-////		.split(new LastFMSplitExpression())
-////		.to("file:fm-out?fileName=lastFM_${date:now:yyyyMMdd_HHmmssSSS}.txt");
-//	//	.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user") +"&to="+p.getProperty("email.user")); 
-//
-//		
-// end testing
-
+				+"&password="+p.getProperty("email.password")+"&From="+p.getProperty("email.user"));
 		
 		
 		
-		
-		// Sending Newsletter -> Versuch
-/*		from("file:fm-in?noop=true")
-		.log("Working on file ${header.CamelFileName}")
-		.setHeader("subject", simple("New incident: first hello")) //${header.CamelFileName}
-		.to("smtp://" + p.getProperty("email.host") + "?password=" + p.getProperty("email.password")+"&From="+p.getProperty("email.user") +"&to="+p.getProperty("email.user")); 
-*/
-		/*zum Experimentieren
-		 * 
-		 * //	"smtp://you@mymailserver.com?password=secret&From=you@apache.org" + recipients
-			//smtp://host[:port]?password=somepwd&username=someuser
-
-			//.to("smtps://smtp.gmail.com?username=fullemailaddress&password=secretpw&to=recipient@mail.com");
-			//"smtps://myname@gmx.at?password=secretpw&to=recipient@mail.com"
-
+		/**
+		 **--------------------
+		 **MongoDB -Routes
+		 **--------------------
 		 */
-		
-		
 		//Inserts data about artist into MongoDB overwrites if already existing
 		from("direct:mongoInsert")
 		.to("metrics:timer:mongo-insert.timer?action=start")
@@ -407,12 +392,12 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		/****** TEST ROUTES FOR MONGO DB PLZ DONT DELETE *****/       
 
-//		     from("timer://runOnce?repeatCount=2&delay=5000")
-//		     .to("direct:testFindAll");
-//		     .to("direct:testInsert");
-//		     .to("direct:testFindById");
-		//     .to("direct:testRemove");
-		//     .to("direct:mongoGetArtists");
+		// from("timer://runOnce?repeatCount=2&delay=5000")
+		// .to("direct:testFindAll");
+		// .to("direct:testInsert");
+		// .to("direct:testFindById");
+		// .to("direct:testRemove");
+		// .to("direct:mongoGetArtists");
 		     
 		HashMap<String,HashMap<String,String>> mongoTest = new HashMap<String,HashMap<String,String>>();
 		HashMap<String,String> mongoTest2 = new HashMap<String,String>();
@@ -444,14 +429,10 @@ public class SimpleRouteBuilder extends RouteBuilder {
 		
 		JdbcMessageIdRepository testRepo = new JdbcMessageIdRepository(ds, "test");
 		
-		
-		
 		from("direct:testFindById")
 		.setHeader("artist").simple("blind guardian")
 		.setHeader("type").simple("test")
 		.setHeader("subscriber").simple("testsub")
-//		.setHeader("location")
-//		.simple("St. P�lten, Wien")
 		.setBody()
 		.simple("${header.type}")
 		.process(new MongoFilterProcessor())

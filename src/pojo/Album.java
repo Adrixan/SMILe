@@ -1,5 +1,6 @@
 package pojo;
 
+// Album fuer Amazon Daten (pro Album ein Eintrag in einer Liste)
 public class Album {
 	private String title="";
 	private String price="";
