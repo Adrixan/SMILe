@@ -64,6 +64,7 @@ public class YoutubeAPITest {
 	
 	private static class HashProcessor implements Processor {
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void process(Exchange exchange) throws Exception {
 			Message m = exchange.getIn();
@@ -83,7 +84,6 @@ public class YoutubeAPITest {
 
 		@Override
 		public void process(Exchange exchange) throws Exception {
-			Exception e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
 			
 		}
 		

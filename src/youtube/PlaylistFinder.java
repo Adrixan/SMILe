@@ -26,7 +26,6 @@ public class PlaylistFinder {
 
 	private YouTube youtube;
 	private String key;
-	// private final long NUMBER_OF_CHANNELS_RETURNED = 25;
 	private HashMap<String, String> playlistInfo;
 
 	/** Instance of the HTTP transport. */
@@ -49,10 +48,7 @@ public class PlaylistFinder {
 		else
 			key = Launcher.properties.getProperty("youtube.key");
 
-		// This object is used to make YouTube Data API requests. The last
-		// argument is required, but since we don't need anything
-		// initialized when the HttpRequest is initialized, we override
-		// the interface and provide a no-op function.
+		// This object is used to make YouTube Data API requests.
 		youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY,
 				httpRequestInitializer).setApplicationName("SMILe").build();
 	}
@@ -74,11 +70,11 @@ public class PlaylistFinder {
 		search.setKey(key);
 		search.setQ(artistName);
 
-		// Restrict the search results to only include videos. See:
+		// Restrict the search results to only include channels. See:
 		// https://developers.google.com/youtube/v3/docs/search/list#type
 		search.setType("channel");
 
-		// Call the API and print results.
+		// Call the API
 		SearchListResponse searchResponse = search.execute();
 		List<SearchResult> searchResultList = searchResponse.getItems();
 		if (searchResultList != null) {
@@ -89,8 +85,8 @@ public class PlaylistFinder {
 	}
 
 	/**
-	 * Select the best fitting channel based on subscriber count and create an
-	 * info string for its playlist
+	 * Select the best fitting channel based on subscriber count and put 
+	 * its data into a map
 	 * 
 	 * @param iteratorSearchResults
 	 * @return
@@ -99,8 +95,6 @@ public class PlaylistFinder {
 	private void fillPlaylistInfoMap(
 			Iterator<SearchResult> iteratorSearchResults) throws Exception {
 
-		//StringBuilder builder = new StringBuilder();
-		//builder.append("Artist Name: " + artistName + "\n");
 
 		if (!iteratorSearchResults.hasNext()) {
 			throw new Exception("There aren't any results for your query.");

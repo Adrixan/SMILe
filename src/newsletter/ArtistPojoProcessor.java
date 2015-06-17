@@ -11,8 +11,6 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.org.apache.bcel.internal.generic.LSTORE;
-
 import pojo.Album;
 import pojo.AlbumPojo;
 import pojo.ArtistPojo;
@@ -23,14 +21,15 @@ import pojo.LocationPojo;
  */
 public class ArtistPojoProcessor implements Processor {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(ArtistPojoProcessor.class);
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		
 		Message out = exchange.getIn();
 		
-		String newBody="";
 		
 		HashMap<String, Object> bodyMap =  (HashMap<String, Object>) out.getBody();
 		
@@ -163,7 +162,6 @@ public class ArtistPojoProcessor implements Processor {
 		}
 		else {
 			ArrayList<AlbumPojo> albenPojo = new ArrayList<AlbumPojo>();
-			ArrayList<Album> alben = new ArrayList<Album>();
 			
 			if(albenPojo.isEmpty()){
 				
