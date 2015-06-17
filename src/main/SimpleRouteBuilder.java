@@ -279,7 +279,6 @@ public class SimpleRouteBuilder extends RouteBuilder {
 			@Override
 			public void process(Exchange exchange) throws Exception {
 				exchange.getIn().setHeader("To", exchange.getIn().getHeader("subscriber"));
-				System.out.println(exchange.getIn().getHeader("To"));
 			}
 	    })
 	    // Newsletter per SMTP an Subscriber senden
